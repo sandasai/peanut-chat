@@ -1,0 +1,3 @@
+{
+  "dbUri": "mongodb://sandasai:deadbeef@ds111535.mlab.com:11535/ssm-chat-app"
+}
