@@ -36,8 +36,9 @@ export function createSocket(room, username) {
     
     // Setting up handlers
     socket.on('disconnectReason', data => {
-      console.log('blarg', data);
+      console.log('Disconnected', data);
     })
+    
     socket.on('auth', data => {
       // Officially authorized, can enter chat app.
       dispatch({
@@ -47,7 +48,6 @@ export function createSocket(room, username) {
     });
   
     socket.on('sent message', data => {
-      console.log(data);
       dispatch({
         type: Types.onSentMessage,
         payload: data,
