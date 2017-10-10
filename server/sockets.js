@@ -128,26 +128,32 @@ module.exports = function(io) {
     console.log("New client " + username + " connected to " + room);
  
     if (!initializeSocket(socket)) {
+      socket.emit('auth', { success: false });      
       disconnectSocket(socket, 'Username already taken');
       return;
     }
+    socket.emit('auth', { success: true });
     
     joinRoom(socket, room)
       .then(() => {
-
         socket.on('send message', data => {
           const { message, delay } = data;
           createMessage(message, socket.username, new Date(Date.now() - 1000 * delay), room)
             .then(createdMessage => {
-              console.log('created Message', createdMessage);
-              //should query for that message and return it
-              io.to(room).emit('sent message', createdMessage);
+              io.to(room).emit('sent message', {
+                message: createdMessage.message,
+                date: createdMessage.date,
+                rating: createdMessage.rating,
+                room: createdMessage.room.name,
+                user: createdMessage.user.name,
+                id: createdMessage._id,
+              });
             })
             .catch(err => console.log(err));
         });
 
         socket.on('rate message', data => {
-          Message.findById(data.messageId)
+          Message.findById(data.id)
             .then(message => {
               message.rating = message.rating + 1;
               return message.save()
@@ -160,9 +166,11 @@ module.exports = function(io) {
       })
       .catch(err => {
         disconnectSocket(socket, err);
-      })
+      });
 
-    socket.emit('auth', { success: true });
-  
+    socket.on('disconnect', () => {
+      console.log(`${socket.username} disconnected from ${room}`);
+    });
+
   });
 }

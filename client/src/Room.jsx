@@ -20,10 +20,6 @@ class Room extends React.Component {
     this.props.createSocket(room, username);
   }
 
-  componentDidMount() {
-    console.log(this.props);
-  }
-
   componentWillReceiveProps(nextProps) {
     if (nextProps.messages.socket)
       this.setState({ scene: 'room' });
@@ -31,11 +27,21 @@ class Room extends React.Component {
 
   handleMessageSend = (e) => {
     e.preventDefault();
-    this.props.sendMessage(this.state.message);
+    this.props.sendMessage(this.state.message, 0);
+  }
+
+  renderMessages = () => {
+    const { messages } = this.props.messages;
+    return messages.map((message, index) => {
+      return (
+        <li key={index}>
+          {`${message.user}: ${message.message}`}
+        </li>
+      );
+    });
   }
 
   render() {
-    console.log(this.props);
     const { room } = this.props.match.params;
 
     switch(this.state.scene) {
@@ -51,7 +57,11 @@ class Room extends React.Component {
         return (
           <div>
             <div id='main' className={`${this.state.showPanel ? 'pushed' : ''}`}>
-              <div id='messages' />
+              <div id='messages'>
+                <ul>
+                  {this.renderMessages()}
+                </ul>
+              </div>
               <a onClick={() => this.setState({ showPanel: !this.state.showPanel})}>
                 <i id="gear" className="fa fa-cog" aria-hidden="true"></i>
               </a>
