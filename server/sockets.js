@@ -176,7 +176,6 @@ module.exports = function(io) {
               else if (rating === 'down')
                 message.rating = message.rating - 1;
               else {
-                console.log('gets here', rating)
                 return;                
               }
               return message.save()

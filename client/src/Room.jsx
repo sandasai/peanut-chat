@@ -4,6 +4,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
+import Message from './Message';
 import { actions } from './services/messages';
 import { Room as RoomService } from './services';
 import Signin from './Signin';
@@ -16,6 +17,7 @@ class Room extends React.Component {
       loading: true,
       scene: 'signin', // Either 'loading' 'signin' or 'room'
       messageInput: '',
+      mode: 'default'
     };
   }
 
@@ -46,6 +48,13 @@ class Room extends React.Component {
     ReactDOM.findDOMNode(this.messagesEnd).scrollIntoView({ behavior: "smooth" });
   }
 
+  handleRate = (id) => {
+    console.log(id);
+    this.setState({
+      mode: 'default',
+    })
+  }
+
   renderMessages = () => {
     const { messages } = this.props.messages;
     return (
@@ -53,9 +62,14 @@ class Room extends React.Component {
         {
           messages.map((message, index) => {
             return (
-              <li key={index} className='message-item'>
-                {`${message.user}: ${message.message}`}
-              </li>
+              <Message 
+                key={index} 
+                user={message.user} 
+                message={message.message} 
+                mode={this.state.mode === 'default' ? 'default' : 'select'}
+                rating={message.rating}
+                onRate={() => this.handleRate(message.id)}
+              />
             )
           })
         }
@@ -63,7 +77,12 @@ class Room extends React.Component {
     );
   }
 
-
+  changeMode = (mode) => {
+    if (this.state.mode === mode)
+      this.setState({ mode: 'default'});
+    else
+      this.setState({ mode });
+  }
 
   render() {
     const { room } = this.props.match.params;
@@ -91,8 +110,8 @@ class Room extends React.Component {
                     <input id='message-box' type='text' value={this.state.messageInput} onChange={e => this.setState({ messageInput: e.target.value })}/>
                     <input id='message-submit' type='submit' />
                   </form>
-                  <a><i className="fa fa-thumbs-up rate up" aria-hidden="true"></i></a>
-                  <a><i className="fa fa-thumbs-down rate down" aria-hidden="true"></i></a>
+                  <a onClick={() => this.changeMode('thumbs-up')}><i className="fa fa-thumbs-up rate up" aria-hidden="true"></i></a>
+                  <a onClick={() => this.changeMode('thumbs-down')}><i className="fa fa-thumbs-down rate down" aria-hidden="true"></i></a>
                 </div>
               </div>
               <a onClick={() => this.setState({ showPanel: !this.state.showPanel})}>

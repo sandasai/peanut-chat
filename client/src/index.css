@@ -62,6 +62,17 @@ body {
   width: auto;
   background-color: #fff;
   border-radius: 3px;
+  transition: 500ms;  
+}
+
+.message-item.select {
+  cursor: pointer;
+  background-color: #e8a3ff;
+  transition: 500ms;
+}
+
+.message-item.select.hover {
+  background-color: #fff;
 }
 
 .message-transition-enter {
