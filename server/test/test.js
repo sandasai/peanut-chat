@@ -1,4 +1,5 @@
 import io from 'socket.io-client';
+import randomstring from 'randomstring';
 
 const assert = require('assert');
 const serverAddress = 'http://localhost:3001';
@@ -171,10 +172,11 @@ describe('Socket.io', () => {
     let clients = {};
     
     beforeEach(done => {
-      let a = generateAndAssertConnection('testRoom', 'A');
-      let b = generateAndAssertConnection('testRoom', 'B');
-      let c = generateAndAssertConnection('testRoom', 'C');
-      let d = generateAndAssertConnection('testRoom', 'D');
+      let room = randomstring.generate();
+      let a = generateAndAssertConnection(room, 'A');
+      let b = generateAndAssertConnection(room, 'B');
+      let c = generateAndAssertConnection(room, 'C');
+      let d = generateAndAssertConnection(room, 'D');
       Promise.all([a, b, c, d])
         .then(values => {
           clients = {
@@ -196,7 +198,6 @@ describe('Socket.io', () => {
 
     it('should send a message from a user and recieve from another user', done => {
       const message = 'hello world!!!!';
-
       const promises = [];
       for (let client in clients) {
         let promise = new Promise((resolve, reject) => {
@@ -250,6 +251,140 @@ describe('Socket.io', () => {
   });
   
   describe('rating messages, user levels', done => {
+    // Different clients to use
+    let clients = {};
+    // client a will emit a message, initial rating should be zero
+    let testMessage;
 
+    beforeEach(done => {
+      let a = generateAndAssertConnection('testRoomX', 'A');
+      let b = generateAndAssertConnection('testRoomX', 'B');
+      let c = generateAndAssertConnection('testRoomX', 'C');
+      let d = generateAndAssertConnection('testRoomX', 'D');
+      Promise.all([a, b, c, d])
+        .then(values => {
+          let messageString = randomstring.generate();
+          clients = {
+            a : values[0],
+            b : values[1],
+            c : values[2],
+            d : values[3],
+          };
+          // store the message sent
+          const promises = [];
+          for (let client in clients) {
+            let promise = new Promise((resolve, reject) => {
+              clients[client].on('sent message', data => {
+                if (data.message === messageString) {
+                  testMessage = data;                  
+                  resolve();
+                } else {
+                  reject(new Error('Message discrepancy'));
+                }
+              });
+            })
+            promises.push(promise);
+          }
+
+          setTimeout(() => {
+            clients.a.emit('send message', { message: messageString, delay: 0 })
+          }, 1000);
+
+          return Promise.all(promises).then(() => done());
+        });
+    });
+  
+    afterEach(done => {
+      for (let client in clients) {
+        clients[client].disconnect();
+      }
+      done();
+    });
+
+    it('should initialize message with 0 rating', done => {
+      assert.equal(testMessage.rating, 0);
+      done();
+    });
+
+    //Emits a rating, then checks all clients to expect data for the rating. Returns a promise.
+    function rateAndAssertOnAllClients(emitter, updown, expected) {
+      let allPromises = [];
+      for (let client in clients) {
+        let promise = new Promise((resolve, reject) => {
+          //need to reset the listeners on each socket, in case we have chained this fn
+          clients[client].off('rated message');
+
+          clients[client].on('rated message', data => {
+            assert.equal(data.id, testMessage.id);
+            assert.equal(data.rating, expected);
+            resolve();          
+          });
+        });
+        allPromises.push(promise);
+      }
+
+      setTimeout(() => {
+        clients[emitter].emit('rate message', { id: testMessage.id, rating: updown });        
+      }, 500);
+
+      return Promise.all(allPromises);
+    }
+
+    it('should rate up a message', done => {
+      rateAndAssertOnAllClients('b', 'up', 1).then(() => done());
+    });
+
+    it('should rate down a message', done => {
+      rateAndAssertOnAllClients('c', 'down', -1).then(() => done());
+    });
+
+    it('should not allow client to rate their own message', done => {
+      // clients shouldn't get a response if single client attempts to rate their own
+      let fail = false;
+      for (let client in clients) {
+        clients[client].on('rated message', data => {
+          fail = true;       
+        });
+      }
+
+      setTimeout(() => {
+        clients.a.emit('rate message', { id: testMessage.id, rating: 'up' });        
+      }, 100);
+
+      setTimeout(() => {
+        assert(!fail);
+        done();
+      }, 1000);
+    });
+
+    it('should not allow client to rate multiple times', done => {
+      let rating = 0;
+      clients.c.on('rated message', data => {
+        rating = data.rating;
+      });
+      setTimeout(() => {
+        clients.b.emit('rate message', { id: testMessage.id, rating: 'up' }); 
+      }, 100);
+      setTimeout(() => {
+        clients.b.emit('rate message', { id: testMessage.id, rating: 'down' });              
+      }, 400);
+      setTimeout(() => {
+        assert.equal(rating, 1);
+        done();
+      }, 2000);
+    });
+
+    it('should be able to rate message multiple times from different clients', done => {
+      rateAndAssertOnAllClients('b', 'up', 1)
+      .then(() => {
+        return rateAndAssertOnAllClients('c', 'up', 2);
+      })
+      .then(() => {
+        return rateAndAssertOnAllClients('d', 'down', 1);
+      })
+      .then(() => {
+        done();
+      })
+    })
   });
 });

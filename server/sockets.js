@@ -52,7 +52,10 @@ module.exports = function(io) {
 
     //create a user in the db for the room if it doesnt exist
     return createUser(socket.username, room)
-      .then(() => {
+      .then(user => {
+        //user has been found or created
+        socket.userId = user._id;
+
         //create the room in the database if it exists
         Room.findOne({ name: room }).exec()
         .then(roomId => {
@@ -77,6 +80,7 @@ module.exports = function(io) {
    * Finds a user in the database. Creates a user if it doesn't exist
    * @param {string} username 
    * @param {string} room 
+   * @returns {Promise} Resolves into a user object
    */
   function createUser(username, room) {
     return User.findOne({ name: username }).exec()
@@ -90,8 +94,6 @@ module.exports = function(io) {
             messages: [],
           });
           return newUser.save()
-            .then(() => Promise.resolve())
-            .catch(err => Promise.reject(err));
         }
       })
       .catch(err => Promise.reject(err));
@@ -136,8 +138,10 @@ module.exports = function(io) {
     
     joinRoom(socket, room)
       .then(() => {
+
         socket.on('send message', data => {
           const { message, delay } = data;
+
           createMessage(message, socket.username, new Date(Date.now() - 1000 * delay), room)
             .then(createdMessage => {
               io.to(room).emit('sent message', {
@@ -153,13 +157,35 @@ module.exports = function(io) {
         });
 
         socket.on('rate message', data => {
-          Message.findById(data.id)
+          const { id, rating } = data;
+
+          Message.findById(data.id).populate('user', 'name')
             .then(message => {
-              message.rating = message.rating + 1;
+
+              // check if rating comes from same user              
+              if (socket.username === message.user.name)
+                return;
+
+              // check if user has already rated this
+              if (message.ratedBy[socket.userId])
+                return;
+              message.ratedBy[socket.userId] = true;              
+
+              if (rating === 'up')
+                message.rating = message.rating + 1;
+              else if (rating === 'down')
+                message.rating = message.rating - 1;
+              else {
+                console.log('gets here', rating)
+                return;                
+              }
               return message.save()
-                .then(message => {
-                  io.to(room).emit('rated message', message);
-                })
+                .then(ratedMessage => {
+                  io.to(room).emit('rated message', {
+                    id: ratedMessage._id,
+                    rating: ratedMessage.rating,
+                  });
+                });
             })
             .catch(err => console.log(err));
         })

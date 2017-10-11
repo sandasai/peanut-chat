@@ -35,6 +35,9 @@ const MessageSchema = Schema({
     type: Number,
     default: 0,
   },
+  ratedBy: {
+    type: Schema.Types.Mixed, default: {}
+  },
   room: {
     type: Schema.Types.ObjectId, ref: 'Room'    
   }
