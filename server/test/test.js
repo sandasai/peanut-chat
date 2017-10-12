@@ -39,7 +39,7 @@ describe('Socket.io', () => {
         }
       });
       client1.on('auth', data => {
-        assert.deepEqual(data, { success: true });
+        assert.equal(data.success, true);
         client1.disconnect();   
         done();             
       });
@@ -53,7 +53,7 @@ describe('Socket.io', () => {
         }
       });
       client1.on('auth', data => {
-        assert.deepEqual(data, { success: true });
+        assert.equal(data.success, true);
         let client2 = io.connect(serverAddress, {
           query: {
             room: 'testroom1',
@@ -61,7 +61,7 @@ describe('Socket.io', () => {
           }
         });
         client2.on('auth', data => {
-          assert.deepEqual(data, { success: false });
+          assert.equal(data.success, false);
           client1.disconnect();
           client2.disconnect();
           done();

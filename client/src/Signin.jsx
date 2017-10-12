@@ -1,18 +1,16 @@
 import React from 'react';
-
 import PropTypes from 'prop-types';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import { connection, Room, Messages } from './services';
+import { actions } from './services/messages';
 
-export default class Signin extends React.Component {
+class Signin extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       username: '',
     };
-  }
-
-  componentDidMount = () => {
-    //const socket = Messages.createSocket(this.props.room, 'ads');
   }
 
   handleSubmit = (e) => {
@@ -22,10 +20,11 @@ export default class Signin extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className='signin'>
         <form onSubmit={this.handleSubmit}>
           <label id='signin-form'>
             Enter a username
+            <br/> 
             <input 
               type='text' 
               maxLength={20} 
@@ -39,6 +38,16 @@ export default class Signin extends React.Component {
     )
   }
 }
+
+const mapStateToProps = (state) => {
+  return { messages: state.messages };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators({ actions }, dispatch);
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Signin);
 
 Signin.propTypes = {
   onSignin: PropTypes.func,

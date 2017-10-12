@@ -7,6 +7,8 @@ export const Types = {
   onAuth: 'onAuth',
   emitSendMessage: 'emitSendMessage',
   onSentMessage: 'onSentMessage',
+  emitRateMessage: 'emitRatemessage',
+  onRatedMessage: 'onRatedMessage',
 }
 /**
  * Events to emit
@@ -40,11 +42,21 @@ export function createSocket(room, username) {
     })
     
     socket.on('auth', data => {
-      // Officially authorized, can enter chat app.
-      dispatch({
-        type: Types.onAuth,
-        payload: data,
-      });
+      // Officially authorized, can enter chat app.      
+      if (data.success)
+        dispatch({
+          type: Types.onAuth,
+          success: true,
+          payload: socket,
+        });
+
+      else {
+        dispatch({
+          type: Types.onAuth,
+          success: false,
+          payload: data.reason,
+        });
+      }
     });
   
     socket.on('sent message', data => {
@@ -53,13 +65,14 @@ export function createSocket(room, username) {
         payload: data,
       });
     });
-  
-  
-    // Store the socket
-    dispatch({ 
-      type: Types.createSocket,
-      payload: socket
+
+    socket.on('rated message', data => {
+      dispatch({
+        type: Types.onRatedMessage,
+        payload: data,
+      })
     });
+  
   }
  
 }
@@ -68,5 +81,12 @@ export function sendMessage(message, delay) {
   return (dispatch, getState) => {
     const socket = getState().messages.socket;
     socket.emit('send message', { message, delay });
+  }
+}
+
+export function rateMessage(messageId, updown) {
+  return (dispatch, getState) => {
+    const socket = getState().messages.socket;
+    socket.emit('rate message', { id: messageId, rating: updown});
   }
 }

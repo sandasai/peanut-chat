@@ -41,7 +41,7 @@ const MessageSchema = Schema({
   room: {
     type: Schema.Types.ObjectId, ref: 'Room'    
   }
-})
+});
 
 const UserSchema = Schema({
   name: {
@@ -54,8 +54,42 @@ const UserSchema = Schema({
     {
       type: Schema.Types.ObjectId, ref: 'Message'
     }
-  ]
-})
+  ],
+  xp: {
+    type: Number, default: 0,
+  },
+  level: {
+    type: Number, default: 1,
+  }
+});
+
+// Updates the level if needed
+UserSchema.methods.updateLevel = function() {
+  const xpStartAtLevel = (level) => {
+    if (level <= 0) 
+      return 0;
+    return level + xpStartAtLevel(level - 1);
+  }
+  const xpToLevelUp = xpStartAtLevel(this.level + 1);
+  const xpAtLevelStart = xpToLevelUp - this.level;
+  if (this.xp > xpToLevelUp) {
+    this.level++;
+  } else if (this.xp < xpAtLevelStart) {
+    this.level--;
+  }
+  return this.save();
+}
+
+// Updates XP on the model
+UserSchema.methods.updateXP = function() {
+  return this.model('User').findById(this._id).populate('messages', 'rating').exec()
+      .then(user => {
+        user.xp = user.messages.reduce((sum, message) => {
+          return sum + message.rating;
+        }, 0);
+        return user.save();
+      });
+}
 
 module.exports.connect = (uri) => {
   //connect to mongoDb  

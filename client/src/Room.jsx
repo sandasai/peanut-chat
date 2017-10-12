@@ -8,6 +8,7 @@ import Message from './Message';
 import { actions } from './services/messages';
 import { Room as RoomService } from './services';
 import Signin from './Signin';
+import Profile from './Profile';
 
 class Room extends React.Component {
   constructor(props) {
@@ -23,10 +24,6 @@ class Room extends React.Component {
 
   handleSignin = (room, username) => {
     this.props.createSocket(room, username);
-  }
-
-  componentWillUpdate() {
-
   }
 
   componentWillReceiveProps(nextProps) {
@@ -49,7 +46,7 @@ class Room extends React.Component {
   }
 
   handleRate = (id) => {
-    console.log(id);
+    this.props.rateMessage(id, this.state.mode === 'thumbs-up' ? 'up' : 'down');
     this.setState({
       mode: 'default',
     })
@@ -88,10 +85,6 @@ class Room extends React.Component {
     const { room } = this.props.match.params;
 
     switch(this.state.scene) {
-      case 'loading': 
-        return (
-          <div><h1>loading</h1></div>
-        )
       case 'signin':
         return (
           <Signin onSignin={this.handleSignin} room={room}/>
@@ -110,8 +103,12 @@ class Room extends React.Component {
                     <input id='message-box' type='text' value={this.state.messageInput} onChange={e => this.setState({ messageInput: e.target.value })}/>
                     <input id='message-submit' type='submit' />
                   </form>
-                  <a onClick={() => this.changeMode('thumbs-up')}><i className="fa fa-thumbs-up rate up" aria-hidden="true"></i></a>
-                  <a onClick={() => this.changeMode('thumbs-down')}><i className="fa fa-thumbs-down rate down" aria-hidden="true"></i></a>
+                  <a onClick={() => this.changeMode('thumbs-up')}>
+                    <i className="fa fa-thumbs-up rate up" aria-hidden="true"></i>
+                  </a>
+                  <a onClick={() => this.changeMode('thumbs-down')}>
+                    <i className="fa fa-thumbs-down rate down" aria-hidden="true"></i>
+                  </a>
                 </div>
               </div>
               <a onClick={() => this.setState({ showPanel: !this.state.showPanel})}>
@@ -119,6 +116,13 @@ class Room extends React.Component {
               </a>
             </div>
             <div className={`sidenav ${this.state.showPanel ? 'visible' : 'hidden'}`}>
+              <div className='sidenav-content'>
+                <form>
+                  <label for="delay">Delay:</label>
+                  <input id='delay' type='text' />
+                </form>
+                <Profile />
+              </div>
             </div>
           </div>
         )

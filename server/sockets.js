@@ -130,7 +130,7 @@ module.exports = function(io) {
     console.log("New client " + username + " connected to " + room);
  
     if (!initializeSocket(socket)) {
-      socket.emit('auth', { success: false });      
+      socket.emit('auth', { success: false, reason: 'Username already taken' });      
       disconnectSocket(socket, 'Username already taken');
       return;
     }
@@ -152,6 +152,15 @@ module.exports = function(io) {
                 user: createdMessage.user.name,
                 id: createdMessage._id,
               });
+              return createdMessage;
+            })
+            .then(createdMessage => {
+              return User.findOne({ name: createdMessage.user.name }).exec()
+                .then(user => {
+                  user.messages.push(createdMessage._id);
+                  return user.save();
+                })
+                .then(() => createdMessage)
             })
             .catch(err => console.log(err));
         });
@@ -178,16 +187,28 @@ module.exports = function(io) {
               else {
                 return;                
               }
-              return message.save()
-                .then(ratedMessage => {
-                  io.to(room).emit('rated message', {
-                    id: ratedMessage._id,
-                    rating: ratedMessage.rating,
+
+              //check if user needs to level up
+              User.findById(message.user._id)
+                .then(user => {
+                  return user.updateXP();
+                })
+                .then(user => {
+                  return user.updateLevel();
+                })
+                .then(() => {
+                  return message.save()
+                  .then(ratedMessage => {
+                    io.to(room).emit('rated message', {
+                      id: ratedMessage._id,
+                      rating: ratedMessage.rating,
+                    });
                   });
-                });
+                })
             })
             .catch(err => console.log(err));
-        })
+        });
+
       })
       .catch(err => {
         disconnectSocket(socket, err);

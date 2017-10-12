@@ -25,6 +25,7 @@ export default class Message extends React.Component {
         onClick={this.handleClick}
       >
         {`${user}: ${message}`}
+        <div className='message-item-rating'>{rating}</div>
       </li>
     )
   }
