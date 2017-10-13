@@ -8,6 +8,7 @@ module.exports = function(io) {
   /**
    * Returns the socket ids of all sockets in room
    * @param {string} room room to check
+   * @returns {object} sockets
    */
   function getSocketsInRoom(room) {
     return io.sockets.adapter.rooms[room].sockets;
@@ -27,7 +28,7 @@ module.exports = function(io) {
     if(!io.sockets.adapter.rooms[room]) {
       socket.username = username;
       socket.join(room);
-      return true      
+      return true;     
     }
 
     // check if user is taken
@@ -39,6 +40,14 @@ module.exports = function(io) {
     socket.username = username;
     socket.join(room);
     return true;
+  }
+
+  function getSocketFromUsernameInRoom(room, username) {
+    const sockets = getSocketsInRoom(room);
+    for (let socketId in sockets) {
+      if (io.sockets.connected[socketId].username === username)
+        return socketId;
+    }
   }
 
   /**
@@ -83,7 +92,7 @@ module.exports = function(io) {
    * @returns {Promise} Resolves into a user object
    */
   function createUser(username, room) {
-    return User.findOne({ name: username }).exec()
+    return User.findOne({ name: username, room }).exec()
       .then(user => {
         if (user)
           return Promise.resolve(user);
@@ -99,9 +108,16 @@ module.exports = function(io) {
       .catch(err => Promise.reject(err));
   }
   
+  /**
+   * 
+   * @param {*} message String associated with the text
+   * @param {*} user Name of user who creates message
+   * @param {*} date Timestamp on the msesage
+   * @param {*} room Room name to submit message to
+   */
   function createMessage(message, user, date, room) {
-    const roomPromise = Room.findOne({ name: room }).exec();
-    const userPromise = User.findOne({ name: user }).exec();
+    const roomPromise = Room.findOne({ name: room });
+    const userPromise = User.findOne({ name: user, room: room });
     return Promise.all([roomPromise, userPromise])
       .then(values => {
         const roomId = values[0];
@@ -114,7 +130,7 @@ module.exports = function(io) {
           room: roomId,
         });
         return newMessage.save(); 
-    });
+      });
   }
 
   function disconnectSocket(socket, reason) {
@@ -122,12 +138,10 @@ module.exports = function(io) {
     setTimeout(() => {
       socket.disconnect('true');
     }, 2000);
-    console.log(`Disconnected ${socket.handshake.query.username}; reason: ${reason}`)
   }
 
   io.on('connection', socket => {
     const { username, room } = socket.handshake.query;    
-    console.log("New client " + username + " connected to " + room);
  
     if (!initializeSocket(socket)) {
       socket.emit('auth', { success: false, reason: 'Username already taken' });      
@@ -136,9 +150,9 @@ module.exports = function(io) {
     }
     socket.emit('auth', { success: true });
     
+    // Join room, initialize socket handlers
     joinRoom(socket, room)
       .then(() => {
-
         socket.on('send message', data => {
           const { message, delay } = data;
 
@@ -155,68 +169,76 @@ module.exports = function(io) {
               return createdMessage;
             })
             .then(createdMessage => {
-              return User.findOne({ name: createdMessage.user.name }).exec()
+              return User.findOne({ name: createdMessage.user.name, room })
                 .then(user => {
-                  user.messages.push(createdMessage._id);
-                  return user.save();
+                  user.messages.push(createdMessage._id);       
+                  return user.save();           
                 })
-                .then(() => createdMessage)
             })
             .catch(err => console.log(err));
         });
 
         socket.on('rate message', data => {
+          const roomsTest = io.sockets.adapter.rooms;
           const { id, rating } = data;
 
-          Message.findById(data.id).populate('user', 'name')
-            .then(message => {
+          let prevXP, prevLvl;
 
+          Message.findById(data.id).populate('user')
+            .then(message => {
               // check if rating comes from same user              
               if (socket.username === message.user.name)
-                return;
+                return Promise.reject('User cannot rate own message');
 
               // check if user has already rated this
               if (message.ratedBy[socket.userId])
-                return;
+                return Promise.reject('User has already rated this message');
+              
               message.ratedBy[socket.userId] = true;              
 
+              // apply rating
               if (rating === 'up')
                 message.rating = message.rating + 1;
               else if (rating === 'down')
                 message.rating = message.rating - 1;
               else {
-                return;                
+                return Promise.reject(`Invalid rating applied: ${rating}`); 
               }
-
-              //check if user needs to level up
-              User.findById(message.user._id)
-                .then(user => {
-                  return user.updateXP();
-                })
-                .then(user => {
-                  return user.updateLevel();
-                })
-                .then(() => {
-                  return message.save()
-                  .then(ratedMessage => {
-                    io.to(room).emit('rated message', {
-                      id: ratedMessage._id,
-                      rating: ratedMessage.rating,
-                    });
-                  });
-                })
+              message.markModified('rating');
+              return message.save();
             })
-            .catch(err => console.log(err));
+            .then(message => {
+              return Message.findById(data.id).then(m => {
+                return message;
+              });
+            })
+            .then(message => {
+                io.to(room).emit('rated message', {
+                id: message._id,
+                rating: message.rating,
+              });
+              return message;
+            })
+            .then(message => {
+              return User.findById(message.user._id).populate('messages').then(user => {
+                user.updateXP();
+                user.updateLevel();
+                return user;
+              });
+            })
+            .then(user => {
+              const socket = getSocketFromUsernameInRoom(room, user.name);
+              io.to(socket).emit('changed level', { level: user.level });
+            })
+            .catch(err => {
+              console.log(err);
+              //We can reply back to the socket for errors
+            });
         });
 
       })
       .catch(err => {
         disconnectSocket(socket, err);
       });
-
-    socket.on('disconnect', () => {
-      console.log(`${socket.username} disconnected from ${room}`);
-    });
-
   });
-}
+};

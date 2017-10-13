@@ -59,36 +59,30 @@ const UserSchema = Schema({
     type: Number, default: 0,
   },
   level: {
-    type: Number, default: 1,
+    type: Number, default: 0,
   }
 });
 
 // Updates the level if needed
 UserSchema.methods.updateLevel = function() {
-  const xpStartAtLevel = (level) => {
-    if (level <= 0) 
-      return 0;
-    return level + xpStartAtLevel(level - 1);
+  function calcExpectedLevel(xp) {
+    function helper(start, xp, level) {
+      if (start + level - 1 >= xp)
+        return level - 1;
+      return helper(start + level, xp, level + 1);
+    }
+    return helper(0, xp, 1);
   }
-  const xpToLevelUp = xpStartAtLevel(this.level + 1);
-  const xpAtLevelStart = xpToLevelUp - this.level;
-  if (this.xp > xpToLevelUp) {
-    this.level++;
-  } else if (this.xp < xpAtLevelStart) {
-    this.level--;
-  }
+  this.level = calcExpectedLevel(this.xp)
   return this.save();
 }
 
 // Updates XP on the model
 UserSchema.methods.updateXP = function() {
-  return this.model('User').findById(this._id).populate('messages', 'rating').exec()
-      .then(user => {
-        user.xp = user.messages.reduce((sum, message) => {
-          return sum + message.rating;
-        }, 0);
-        return user.save();
-      });
+  this.xp = this.messages.reduce((sum, message) => {
+    return sum + message.rating;
+  }, 0);
+  return this.save();
 }
 
 module.exports.connect = (uri) => {

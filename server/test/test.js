@@ -257,10 +257,14 @@ describe('Socket.io', () => {
     let testMessage;
 
     beforeEach(done => {
-      let a = generateAndAssertConnection('testRoomX', 'A');
-      let b = generateAndAssertConnection('testRoomX', 'B');
-      let c = generateAndAssertConnection('testRoomX', 'C');
-      let d = generateAndAssertConnection('testRoomX', 'D');
+      let roomName = randomstring.generate({
+        charset: 'alphanumeric',
+        length: 10,
+      });
+      let a = generateAndAssertConnection(roomName, 'A');
+      let b = generateAndAssertConnection(roomName, 'B');
+      let c = generateAndAssertConnection(roomName, 'C');
+      let d = generateAndAssertConnection(roomName, 'D');
       Promise.all([a, b, c, d])
         .then(values => {
           let messageString = randomstring.generate();
@@ -295,10 +299,12 @@ describe('Socket.io', () => {
     });
   
     afterEach(done => {
-      for (let client in clients) {
-        clients[client].disconnect();
-      }
-      done();
+      setTimeout(() => {
+        for (let client in clients) {
+          clients[client].disconnect();
+        }
+        done();        
+      }, 2000)
     });
 
     it('should initialize message with 0 rating', done => {
@@ -325,7 +331,7 @@ describe('Socket.io', () => {
 
       setTimeout(() => {
         clients[emitter].emit('rate message', { id: testMessage.id, rating: updown });        
-      }, 500);
+      }, 300);
 
       return Promise.all(allPromises);
     }
@@ -385,6 +391,34 @@ describe('Socket.io', () => {
       .then(() => {
         done();
       })
+    })
+
+    it('should level up the first client with a single up rating', done => {
+      clients.a.on('changed level', data => {
+        assert.equal(data.level, 1);
+        done();
+      });
+      setTimeout(() => {
+        clients.b.emit('rate message', { id: testMessage.id, rating: 'up' });
+      }, 500);
+    });
+
+    it('should level up twice with 3 ratings', done => {
+      let level = 0;
+
+      clients.a.on('changed level', data => {
+        console.log('changed level', data);
+        level = data.level;
+      });
+      setTimeout(() => {
+        rateAndAssertOnAllClients('b', 'up', 1)
+        .then(() => rateAndAssertOnAllClients('c', 'up', 2))
+        .then(() => rateAndAssertOnAllClients('d', 'up', 3))
+      }, 500);
+      setTimeout(() => {
+        assert.equal(level, 2);
+        done()
+      }, 3000);
     })
   });
 });
