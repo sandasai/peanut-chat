@@ -36,7 +36,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 require('./sockets')(io);
 
-const port = 3001;
+const port = (process.env.PORT || 5000)
 
 server.listen(port, () => {
   console.log('We are live on ' + port);
