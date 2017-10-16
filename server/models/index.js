@@ -60,11 +60,24 @@ const UserSchema = Schema({
   },
   level: {
     type: Number, default: 0,
+  },
+  startLevelXp: {
+    type: Number, default: 0,
+  },
+  nextLevelXp: {
+    type: Number, default: 1,
   }
 });
 
 // Updates the level if needed
 UserSchema.methods.updateLevel = function() {
+  function calcXpAtStartLevel(level) {
+    if (level === 0) {
+      return 0;
+    }
+    return level + calcXpAtStartLevel(level - 1);
+  }
+
   function calcExpectedLevel(xp) {
     function helper(start, xp, level) {
       if (start + level - 1 >= xp)
@@ -73,7 +86,9 @@ UserSchema.methods.updateLevel = function() {
     }
     return helper(0, xp, 1);
   }
-  this.level = calcExpectedLevel(this.xp)
+  this.level = calcExpectedLevel(this.xp);
+  this.startLevelXp = calcXpAtStartLevel(this.level);
+  this.nextLevelXp = this.startLevelXp + this.level + 1;
   return this.save();
 }
 

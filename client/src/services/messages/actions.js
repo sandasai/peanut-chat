@@ -9,23 +9,9 @@ export const Types = {
   onSentMessage: 'onSentMessage',
   emitRateMessage: 'emitRatemessage',
   onRatedMessage: 'onRatedMessage',
+  onChangedXp: 'onChangedXp',
+  onUpdatedProfile: 'onUpdatedProfile',
 }
-/**
- * Events to emit
- *  sending a message
- *  rating a messasge
- * 
- * Events to recieve
- *  auth - when logged in and connected to room
- *  recieving a message
- *  rating a message
- *  xp/gaming update
- *  
- * To code on the client
- *  chat delay
- *  redux for storing message data, user data and settings
- *  cannot send on chat timeout
- */  
 
 export function createSocket(room, username) {
   return (dispatch, getStore) => {
@@ -48,6 +34,7 @@ export function createSocket(room, username) {
           type: Types.onAuth,
           success: true,
           payload: socket,
+          username: data.username,
         });
 
       else {
@@ -70,7 +57,21 @@ export function createSocket(room, username) {
       dispatch({
         type: Types.onRatedMessage,
         payload: data,
-      })
+      });
+    });
+
+    socket.on('changed xp', data => {
+      dispatch({
+        type: Types.onChangedXp,
+        payload: data,
+      });
+    });
+
+    socket.on('updated profile', data => {
+      dispatch({
+        type: Types.onUpdatedProfile,
+        payload: data,
+      });
     });
   
   }

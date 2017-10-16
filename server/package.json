@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
+    "heroku-postbuild": "cd ../client && yarn --production=false && yarn run build",
     "test": "mocha --compilers js:babel-core/register --timeout 5000"
   },
   "author": "",

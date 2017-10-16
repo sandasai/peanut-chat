@@ -21,19 +21,21 @@ class Signin extends React.Component {
   render() {
     return (
       <div className='signin'>
-        <form onSubmit={this.handleSubmit}>
-          <label id='signin-form'>
+        <form onSubmit={this.handleSubmit} className='signin-form'>
+          <label>
             Enter a username
-            <br/> 
-            <input 
-              type='text' 
-              maxLength={20} 
-              value={this.state.username} 
-              onChange={(e) => this.setState({ username: e.target.value })}
-            />
           </label>
+          <input 
+            type='text' 
+            maxLength={20} 
+            value={this.state.username} 
+            onChange={(e) => this.setState({ username: e.target.value })}
+          />
           <input type="submit" value="Submit" />
         </form>
+        { this.props.messages.signInError &&
+        <span>{this.props.messages.signInError}</span>
+        }
       </div>
     )
   }

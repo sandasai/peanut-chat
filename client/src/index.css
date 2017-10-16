@@ -13,6 +13,11 @@ body {
   background-color: #dbdbdb;
 }
 
+#app {
+  width: 100vh;
+  height: 100vh;
+}
+
 .app-header {
   display: flex;
   flex-direction: column;
@@ -40,16 +45,19 @@ body {
 #messages {
   display: flex;
   flex-direction: column;
-  height: calc(100%);
-  width: calc(100%);
-  border-color: #111;
-  border-width: 1px;
-  border-style: solid;
+  height: 100%;
+  width: 100%;
+}
+
+#message-header {
+  flex: 0 0 auto;
+  padding: 10px;
 }
 
 /* Main box showing messages */
 #messages ul {
-  flex-grow: 1;
+  position: relative;
+  flex: 1 1 auto;
   overflow-y: scroll;
   padding: 0;
   list-style: none;
@@ -104,9 +112,11 @@ body {
 }
 
 #message-interact {
+  flex: 0 0 auto;    
   display: flex;
   flex-direction: row;
 }
+
 /* message-form for submitting new messages */
 #message-form {
   display: inline-block;
@@ -195,7 +205,7 @@ body {
   right: 10px;
   margin-right: 0;
   font-size: 3rem;
-  color: #c4c4c4;
+  color: #2b2b2b;
   -webkit-transition: -webkit-transform .8s ease-in-out;
   transition: transform 0.5s ease-in-out;
 }
@@ -238,4 +248,24 @@ body {
   align-items: center;
   align-content: center;
   height: 100vh;
+}
+
+.signin > * {
+  margin: 10px 0;
+}
+
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+}
+
+.signin-form input {
+  display: inline-block;  
+}
+
+.signin-form > * {
+  margin: 10px 0;  
 }

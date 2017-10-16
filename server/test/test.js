@@ -14,7 +14,7 @@ function generateAndAssertConnection(room, username) {
   return new Promise((resolve, reject) => {
     const client = io.connect(serverAddress, { query: { room, username } });
     client.on('auth', data => {
-      assert.deepEqual(data, { success: true });
+      assert.equal(data.success, true);
       resolve(client);
     });  
   });
@@ -78,7 +78,7 @@ describe('Socket.io', () => {
         }
       });
       client1.on('auth', data => {
-        assert.deepEqual(data, { success: true });
+        assert.equal(data.success, true);
         a = true;
       });
 
@@ -89,7 +89,7 @@ describe('Socket.io', () => {
         }
       });
       client2.on('auth', data => {
-        assert.deepEqual(data, { success: true });
+        assert.equal(data.success, true);
         b = true;  
       });
 
@@ -101,7 +101,7 @@ describe('Socket.io', () => {
         }
       });
       client3.on('auth', data => {
-        assert.deepEqual(data, { success: true });
+        assert.equal(data.success, true);
         c = true;
       });
 
@@ -126,7 +126,7 @@ describe('Socket.io', () => {
           }
         });
         clientA.on('auth', data => {
-          assert.deepEqual(data, { success: true });
+          assert.equal(data.success, true);
           resolve(true);
         });
       });
@@ -139,7 +139,7 @@ describe('Socket.io', () => {
           }
         });
         clientB.on('auth', data => {
-          assert.deepEqual(data, { success: true });
+          assert.equal(data.success, true);
           resolve(true);
         });  
       });
@@ -152,7 +152,7 @@ describe('Socket.io', () => {
           }
         });
         clientC.on('auth', data => {
-          assert.deepEqual(data, { success: true });
+          assert.equal(data.success, true);
           resolve(true);
         });
       });
@@ -394,20 +394,21 @@ describe('Socket.io', () => {
     })
 
     it('should level up the first client with a single up rating', done => {
-      clients.a.on('changed level', data => {
+      clients.a.on('updated profile', data => {
+        if (!data.level)
+          return;
         assert.equal(data.level, 1);
         done();
       });
       setTimeout(() => {
         clients.b.emit('rate message', { id: testMessage.id, rating: 'up' });
-      }, 500);
+      }, 1000);
     });
 
     it('should level up twice with 3 ratings', done => {
       let level = 0;
 
-      clients.a.on('changed level', data => {
-        console.log('changed level', data);
+      clients.a.on('updated profile', data => {
         level = data.level;
       });
       setTimeout(() => {
@@ -420,5 +421,6 @@ describe('Socket.io', () => {
         done()
       }, 3000);
     })
+    
   });
 });

@@ -1,15 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export default class ProgressBar extends React.Component {
-  render() {
-    return (
-      <div className='progress-bar'>
-        <div className='progress-bar-meter' style={{ width: `${this.props.filled}%`}} />
-      </div>
-    )
-  }
+const ProgressBar = (props) => {
+  return (
+    <div className='progress-bar'>
+      <div className='progress-bar-meter' style={{ width: `${props.filled}%`}} />
+    </div>
+  )
 }
+
+export default ProgressBar;
 
 ProgressBar.propTypes = {
   filled: PropTypes.number,

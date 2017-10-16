@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const http = require('http');
+const path = require('path');
 const socketIo = require('socket.io');
 
 const config = require('./config');
@@ -17,6 +18,9 @@ require('./models').connect(config.dbUri);
 
 // Setting up express
 const app = express();
+
+// use create-react-app build files and serve them
+app.use(express.static(path.join(__dirname, '/../client/build')));
 
 //http parsers
 app.use(morgan('combined'));

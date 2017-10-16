@@ -42,7 +42,8 @@ class Room extends React.Component {
   }
 
   scrollToBottom = () => {
-    ReactDOM.findDOMNode(this.messagesEnd).scrollIntoView({ behavior: "smooth" });
+    if (this.messagesEnd)
+      ReactDOM.findDOMNode(this.messagesEnd).scrollIntoView({ behavior: "smooth" });
   }
 
   handleRate = (id) => {
@@ -91,13 +92,19 @@ class Room extends React.Component {
         )
       case 'room':
         return (
-          <div>
+          <div id='app'>
             <div id='main' className={`${this.state.showPanel ? 'pushed' : ''}`}>
               <div id='messages'>
+
+                <div id='message-header'>
+                  <Profile />
+                </div>
+
                 <ul>
                   {this.renderMessages()}
-                  <div style={{ float:"left", clear: "both" }} ref={(el) => { this.messagesEnd = el; }}></div>
+                  <div style={{ float:"left", clear: "both", height: 0 }} ref={(el) => { this.messagesEnd = el; }}></div>
                 </ul>
+
                 <div id='message-interact'>
                   <form id='message-form' onSubmit={this.handleMessageSend}>
                     <input id='message-box' type='text' value={this.state.messageInput} onChange={e => this.setState({ messageInput: e.target.value })}/>
@@ -110,6 +117,7 @@ class Room extends React.Component {
                     <i className="fa fa-thumbs-down rate down" aria-hidden="true"></i>
                   </a>
                 </div>
+
               </div>
               <a onClick={() => this.setState({ showPanel: !this.state.showPanel})}>
                 <i id="gear" className="fa fa-cog" aria-hidden="true"></i>
@@ -118,10 +126,9 @@ class Room extends React.Component {
             <div className={`sidenav ${this.state.showPanel ? 'visible' : 'hidden'}`}>
               <div className='sidenav-content'>
                 <form>
-                  <label for="delay">Delay:</label>
+                  <label htmlFor="delay">Delay:</label>
                   <input id='delay' type='text' />
                 </form>
-                <Profile />
               </div>
             </div>
           </div>

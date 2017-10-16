@@ -148,7 +148,16 @@ module.exports = function(io) {
       disconnectSocket(socket, 'Username already taken');
       return;
     }
-    socket.emit('auth', { success: true });
+    
+    //Pull up profile information if it exists, send it back
+    User.findOne({ name: username, room }).then(user => {
+      if (user) {
+        const { level, xp, messages } = user;
+        socket.emit('updated profile', { level, xp, nextLevelXp: xp + level + 1, messageCount: messages.length })      
+      }
+    })
+
+    socket.emit('auth', { success: true, username });
     
     // Join room, initialize socket handlers
     joinRoom(socket, room)
@@ -174,6 +183,9 @@ module.exports = function(io) {
                   user.messages.push(createdMessage._id);       
                   return user.save();           
                 })
+            })
+            .then(user => {
+              io.to(socket.id).emit('updated profile', { messageCount: user.messages.length });
             })
             .catch(err => console.log(err));
         });
@@ -204,6 +216,7 @@ module.exports = function(io) {
               else {
                 return Promise.reject(`Invalid rating applied: ${rating}`); 
               }
+
               message.markModified('rating');
               return message.save();
             })
@@ -228,7 +241,8 @@ module.exports = function(io) {
             })
             .then(user => {
               const socket = getSocketFromUsernameInRoom(room, user.name);
-              io.to(socket).emit('changed level', { level: user.level });
+              const { level, xp, nextLevelXp, startLevelXp } = user;
+              io.to(socket).emit('updated profile', { level, xp, nextLevelXp, startLevelXp });
             })
             .catch(err => {
               console.log(err);
