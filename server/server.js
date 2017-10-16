@@ -9,12 +9,15 @@ const http = require('http');
 const path = require('path');
 const socketIo = require('socket.io');
 
-const config = require('./config');
-
 // mongoose to use promise library
 mongoose.Promise = global.Promise; 
 
-require('./models').connect(config.dbUri);
+let dbUri;
+if (process.env.DATABASE_URL)
+  dbUri = DATABASE_URL
+else 
+  dbUri = require('./config').dbUri;
+require('./models').connect(dbUri);
 
 // Setting up express
 const app = express();
@@ -27,7 +30,7 @@ app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Save all data via sockets, NOT restful api
+// Save all data via sockets
 const server = http.createServer(app);
 const io = socketIo(server);
 require('./sockets')(io);
