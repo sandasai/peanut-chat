@@ -1,5 +1,6 @@
 import io from 'socket.io-client';
-const serverAddress = 'http://localhost:3001';
+const port = (process.env.PORT || 5000);
+const serverAddress = `http://localhost:${port}`;
 
 export const Types = {
   disconnectReason: 'disconnectReason',
