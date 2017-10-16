@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha --compilers js:babel-core/register --timeout 5000"
+    "test": "mocha --compilers js:babel-core/register --timeout 5000",
+    "start_full_build": "cd ../client && npm install && PORT=5050 npm run build_app && PORT=5050 node ../server/server.js"
   },
   "author": "",
   "license": "ISC",

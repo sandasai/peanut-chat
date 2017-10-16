@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-const port = (process.env.PORT || 5000);
+const port = (process.env.REACT_APP_PORT || 5050);
 const serverAddress = `http://localhost:${port}`;
 
 export const Types = {

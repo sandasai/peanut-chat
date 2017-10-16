@@ -4,8 +4,8 @@
   "description": "A chat application",
   "main": "index.js",
   "scripts": {
-    "start": "node server/server.js",
-    "heroku-postbuild": "cd client && npm install && npm run build"
+    "start": "cd server && npm start",
+    "heroku-postbuild": "cd client && npm install && PORT=$PORT npm run build_app"
   },
   "repository": {
     "type": "git",

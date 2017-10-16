@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 import randomstring from 'randomstring';
 
 const assert = require('assert');
-const serverAddress = 'http://localhost:3001';
+const serverAddress = 'http://localhost:5000';
 
 /**
  * Returns a promise that resolves the connection socket

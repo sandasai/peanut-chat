@@ -19,7 +19,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build_app": "REACT_APP_PORT=$PORT react-scripts build"
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "http://localhost:5050"
 }
