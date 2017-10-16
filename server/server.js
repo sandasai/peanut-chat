@@ -22,7 +22,7 @@ require('./models').connect(dbUri);
 // Setting up express
 const app = express();
 
-// use create-react-app build files and serve them
+// NOTE, during development, build client. Uses create-react-app build files and serve them. 
 app.use(express.static(path.join(__dirname, '/../client/build')));
 
 //http parsers

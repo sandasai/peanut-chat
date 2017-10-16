@@ -1,0 +1,20 @@
+{
+  "name": "peanut-chat",
+  "version": "1.0.0",
+  "description": "A chat application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "heroku-postbuild": "cd client && yarn --production=false && yarn run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandasai/peanut-chat.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sandasai/peanut-chat/issues"
+  },
+  "homepage": "https://github.com/sandasai/peanut-chat#readme"
+}
