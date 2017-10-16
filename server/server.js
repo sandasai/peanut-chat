@@ -14,9 +14,10 @@ mongoose.Promise = global.Promise;
 
 let dbUri;
 if (process.env.DATABASE_URL)
-  dbUri = DATABASE_URL
+  dbUri = process.env.DATABASE_URL;
 else 
   dbUri = require('./config').dbUri;
+console.log(dbUri);
 require('./models').connect(dbUri);
 
 // Setting up express
