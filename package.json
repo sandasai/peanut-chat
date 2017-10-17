@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "cd server && npm start",
-    "heroku-postbuild": "cd client && npm install && PORT=$PORT npm run build_app"
+    "heroku-postbuild": "cd client && npm install && npm run build_app"
   },
   "repository": {
     "type": "git",
