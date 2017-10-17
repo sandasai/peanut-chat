@@ -1,4 +1,5 @@
 import io from 'socket.io-client';
+const serverAddress = global.location.origin;
 
 export const Types = {
   disconnectReason: 'disconnectReason',
@@ -13,9 +14,6 @@ export const Types = {
 }
 
 export function createSocket(room, username) {
-  const port = (process.env.REACT_APP_PORT || 5050);
-  const serverAddress = `http://localhost:${port}`;
-  
   return (dispatch, getStore) => {
     const socket = io(`${serverAddress}`, {
       query: {

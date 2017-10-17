@@ -3,9 +3,6 @@ import { BrowserRouter as Router, Route, Switch, Redirect, Link } from 'react-ro
 import Room from './Room';
 
 class App extends Component {
-  componentDidMount() {
-    console.log('Process vars', process.env);
-  }
   render() {
     return (
       <Router>
