@@ -8,7 +8,7 @@ function sendMessage (io, socket, room, data) {
   
   return new Promise((resolve, reject) => {
     const roomPromise = Room.findOne({ name: room });
-    const userPromise = User.findOne({ name: user, room: room });
+    const userPromise = User.findOne({ name: socket.username, room: room });
     return Promise.all([roomPromise, userPromise])
       .then(values => {
         const roomId = values[0];
@@ -16,7 +16,7 @@ function sendMessage (io, socket, room, data) {
         const newMessage = new Message({
           user: userId,
           message,
-          date,
+          date: new Date(Date.now() - 1000 * delay),
           rating: 0,
           room: roomId,
         });

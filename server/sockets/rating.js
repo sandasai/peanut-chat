@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
+const Message = mongoose.model('Message');
 const util = require('./util');
 
 module.exports = {
@@ -72,6 +73,7 @@ module.exports = {
           io.to(socketId).emit('updated profile', { level, xp, nextLevelXp, startLevelXp });
         })
         .catch(err => {
+          console.log(err)
           socket.emit('rate message error', err)
           return Promise.resolve()
         })
