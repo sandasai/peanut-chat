@@ -20,7 +20,12 @@ function sendMessage (io, socket, room, data) {
           rating: 0,
           room: roomId,
         });
-        return newMessage.save(); 
+        return newMessage.save()
+      })
+      .then(createdMessage => {
+        return Message.findById(createdMessage._id)
+                .populate('room', 'name')
+                .populate('user', 'name')
       })
       .then(createdMessage => {
         io.to(room).emit('sent message', {

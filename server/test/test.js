@@ -212,7 +212,7 @@ describe('Socket.io', () => {
       //Give some time for clients to connect, join room
       setTimeout(() => {
         clients.a.emit('send message', { delay: 0, message });          
-      }, 1000);
+      }, 2000);
       
       Promise.all(promises).then(() => done());
     });

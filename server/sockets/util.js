@@ -18,14 +18,24 @@ function getSocketIds(io, room) {
  * @param {Object} username username 
  */
 function getSocketIdFromUsername(io, room, username) {
-  const sockets = getSocketsIds(io, room);
+  const sockets = getSocketIds(io, room);
   for (let socketId in sockets) {
     if (io.sockets.connected[socketId].username === username)
       return socketId;
   }
 }
 
+function getSocketsInRoom(io, room) {
+  const sockets = getSocketIds(io, room);
+  const socketList = []
+  for (let socketId in sockets) {
+    socketList.push(io.sockets.connected[socketId])
+  }
+  return socketList;
+}
+
 module.exports = {
   getSocketIds,
-  getSocketIdFromUsername
+  getSocketIdFromUsername,
+  getSocketsInRoom
 }
