@@ -12,6 +12,7 @@ export const Types = {
   onChangedXp: 'onChangedXp',
   onUpdatedProfile: 'onUpdatedProfile',
   onUpdatedLeaderboard: 'onUpdatedLeaderboard',
+  onUpdatedTopMessages: 'onUpdatedTopMessages',
 }
 
 export function createSocket(room, username) {
@@ -80,6 +81,15 @@ export function createSocket(room, username) {
         return;
       dispatch({
         type: Types.onUpdatedLeaderboard,
+        payload: data,
+      });
+    });
+
+    socket.on('sent top messages', data => {
+      if (!data)
+        return;
+      dispatch({
+        type: Types.onUpdatedTopMessages,
         payload: data,
       });
     });

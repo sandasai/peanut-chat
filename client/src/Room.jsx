@@ -10,6 +10,7 @@ import { Room as RoomService } from './services';
 import Signin from './Signin';
 import Profile from './Profile';
 import Leaderboard from './Leaderboard';
+import TopMessages from './TopMessages';
 
 class Room extends React.Component {
   constructor(props) {
@@ -131,6 +132,7 @@ class Room extends React.Component {
                   <input id='delay' type='text' />
                 </form>
                 <Leaderboard />
+                <TopMessages />
               </div>
             </div>
           </div>

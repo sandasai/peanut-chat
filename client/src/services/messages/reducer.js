@@ -14,6 +14,7 @@ const initialState = {
   },
   scene: 'signin',
   leaderboard: [],
+  topMessages: [],
 }
 
 // Sorts messages by date
@@ -71,6 +72,10 @@ export default function messages(state = initialState, action) {
 
     case Types.onUpdatedLeaderboard: {
       return { ...state, leaderboard: action.payload };
+    }
+
+    case Types.onUpdatedTopMessages: {
+      return { ...state, topMessages: action.payload };
     }
 
     default:
