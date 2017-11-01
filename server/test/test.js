@@ -35,7 +35,7 @@ describe('Socket.io', () => {
       const client1 = io.connect(serverAddress, {
         query: {
           room: 'testroom1',
-          username: 'testUserA',
+          username: `username_${randomstring.generate()}`,
         }
       });
       client1.on('auth', data => {
