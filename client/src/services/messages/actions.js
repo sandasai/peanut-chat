@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-const serverAddress = global.location.origin;
+const serverAddress = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : global.location.origin;
 
 export const Types = {
   disconnectReason: 'disconnectReason',
@@ -11,6 +11,7 @@ export const Types = {
   onRatedMessage: 'onRatedMessage',
   onChangedXp: 'onChangedXp',
   onUpdatedProfile: 'onUpdatedProfile',
+  onUpdatedLeaderboard: 'onUpdatedLeaderboard',
 }
 
 export function createSocket(room, username) {
@@ -74,6 +75,14 @@ export function createSocket(room, username) {
       });
     });
   
+    socket.on('updated leaderboard', data => {
+      if (!data)
+        return;
+      dispatch({
+        type: Types.onUpdatedLeaderboard,
+        payload: data,
+      });
+    });
   }
  
 }

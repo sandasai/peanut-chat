@@ -13,6 +13,7 @@ const initialState = {
     nextLevelXp: 1,
   },
   scene: 'signin',
+  leaderboard: [],
 }
 
 // Sorts messages by date
@@ -66,6 +67,10 @@ export default function messages(state = initialState, action) {
     case Types.onUpdatedProfile: {
       const newProfile = { ...state.profile, ...action.payload };
       return { ...state, profile: { ...newProfile }};
+    }
+
+    case Types.onUpdatedLeaderboard: {
+      return { ...state, leaderboard: action.payload };
     }
 
     default:

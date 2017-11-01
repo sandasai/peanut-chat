@@ -27,45 +27,42 @@ function connection (io, socket) {
   socket.join(room);
 
   socket.emit('auth', { success: true, username });
-
-  return new Promise((resolve, reject) => {
     // Find the user if it exists, if not create user
-    User.findOne({ name: username, room })
-      .then(user => {
-        if (user)
-          return user;
-        else {
-          let newUser = new User({
-            name: username,
-            room: room,
-            messages: [],
-          });
-          return newUser.save()
-        }
-      })
-      .then(user => {
-        socket.userId = user._id;          
-      })
-      .then(Room.findOne({ name: room }))
-      .then(roomDb => {
-        // A room has been found
-        if (roomDb)
-          return Promise.resolve();
-        // If room hasn't been found create a new one
-        else {
-          let newRoom = new Room({
-            name: room,
-            users: [],
-            messages: [],
-          });
-          return newRoom.save();
-        }
-      })
-      .catch(err => {
-        socket.emit('connection error', err)
-        return Promise.reject(err)
-      });
-  })
+  return User.findOne({ name: username, room })
+    .then(user => {
+      if (user)
+        return user;
+      else {
+        let newUser = new User({
+          name: username,
+          room: room,
+          messages: [],
+        });
+        return newUser.save()
+      }
+    })
+    .then(user => {
+      socket.userId = user._id;          
+    })
+    .then(Room.findOne({ name: room }).exec())
+    .then(roomDb => {
+      // A room has been found
+      if (roomDb)
+        return Promise.resolve();
+      // If room hasn't been found create a new one
+      else {
+        let newRoom = new Room({
+          name: room,
+          users: [],
+          messages: [],
+        });
+        return newRoom.save();
+      }
+    })
+    .catch(err => {
+      socket.emit('connection error', err)
+      return Promise.reject(err)
+    });
 }
 
 

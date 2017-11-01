@@ -184,6 +184,10 @@ body {
   color: #fff;
 }
 
+.sidenav-content > * {
+  margin: 15px 0;
+}
+
 .sidenav-content form {
   font-size: 2em;
 }
@@ -268,4 +272,15 @@ body {
 
 .signin-form > * {
   margin: 10px 0;  
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
 }

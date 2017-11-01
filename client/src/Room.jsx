@@ -9,6 +9,7 @@ import { actions } from './services/messages';
 import { Room as RoomService } from './services';
 import Signin from './Signin';
 import Profile from './Profile';
+import Leaderboard from './Leaderboard';
 
 class Room extends React.Component {
   constructor(props) {
@@ -129,6 +130,7 @@ class Room extends React.Component {
                   <label htmlFor="delay">Delay:</label>
                   <input id='delay' type='text' />
                 </form>
+                <Leaderboard />
               </div>
             </div>
           </div>
