@@ -25,6 +25,14 @@ class Room extends React.Component {
     };
   }
 
+  componentDidMount() {
+    // Check every second if any rerender is needed for showing delayed messages
+    setInterval(() => {
+      if (this.state.delay !== 0)
+        this.setState({});
+    }, 1000)
+  }
+
   handleSignin = (room, username) => {
     this.props.createSocket(room, username);
   }
@@ -57,7 +65,6 @@ class Room extends React.Component {
   }
 
   renderMessages = () => {
-    console.log(this.props.messages);
     const { messages } = this.props.messages;
     const currentEffectiveDate = new Date((Date.now() - 1000 * this.state.delay) + 3000);
 
