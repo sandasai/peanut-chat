@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import dateformat from 'dateformat';
+import './message.css';
 
 export default class Message extends React.Component {
   constructor(props) {

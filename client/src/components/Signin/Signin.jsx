@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { connection, Room, Messages } from './services';
-import { actions } from './services/messages';
+import { connection, Room, Messages } from '../../services';
+import { actions } from '../../services/messages';
+import './signin.css'
 
 class Signin extends React.Component {
   constructor(props) {

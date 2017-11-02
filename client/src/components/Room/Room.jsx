@@ -4,13 +4,15 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
-import Message from './Message';
-import { actions } from './services/messages';
-import { Room as RoomService } from './services';
-import Signin from './Signin';
-import Profile from './Profile';
-import Leaderboard from './Leaderboard';
-import TopMessages from './TopMessages';
+import { actions } from '../../services/messages';
+import { Room as RoomService } from '../../services';
+
+import Message from '../Message';
+import Signin from '../Signin';
+import Profile from '../Profile';
+import Leaderboard from '../Leaderboard';
+import { TopMessages } from '../Message';
+import './room.css';
 
 class Room extends React.Component {
   constructor(props) {

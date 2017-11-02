@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import './profile.css';
 
 const ProgressBar = (props) => {
   return (

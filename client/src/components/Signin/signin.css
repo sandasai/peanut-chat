@@ -1,0 +1,28 @@
+.signin {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  height: 100vh;
+}
+
+.signin > * {
+  margin: 10px 0;
+}
+
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+}
+
+.signin-form input {
+  display: inline-block;  
+}
+
+.signin-form > * {
+  margin: 10px 0;  
+}

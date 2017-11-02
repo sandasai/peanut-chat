@@ -1,0 +1,25 @@
+.message-item {
+  margin: 0.5em;
+  padding: 1em 1em;
+  overflow: hidden;  
+  width: auto;
+  background-color: #fff;
+  border-radius: 3px;
+  transition: 500ms;
+  color: black;
+}
+
+.message-item.select {
+  cursor: pointer;
+  background-color: #e8a3ff;
+  transition: 500ms;
+}
+
+.message-item.select.hover {
+  background-color: #fff;
+}
+
+.message-item-rating {
+  color: #dbdbdb;
+  float: right;
+}

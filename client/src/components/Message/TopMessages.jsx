@@ -14,13 +14,13 @@ class TopMessages extends React.Component {
           message={message.message} 
           mode='default'
           rating={message.rating}
+          date={message.date}
         />
       )
     })
   }
 
   render() {
-    console.log(this.props.messages);
     return (
       <ul>
         Top Messages
