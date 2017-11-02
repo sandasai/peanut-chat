@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import dateformat from 'dateformat';
 
 export default class Message extends React.Component {
   constructor(props) {
@@ -24,7 +25,7 @@ export default class Message extends React.Component {
         onMouseLeave={() => this.setState({ hovering: false})}
         onClick={this.handleClick}
       >
-        {`${user}: ${message}`}
+        {`${user} (${dateformat(date, "longTime")}): ${message}`}
         <div className='message-item-rating'>{rating}</div>
       </li>
     )

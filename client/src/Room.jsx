@@ -20,7 +20,8 @@ class Room extends React.Component {
       loading: true,
       scene: 'signin', // Either 'loading' 'signin' or 'room'
       messageInput: '',
-      mode: 'default'
+      mode: 'default',
+      delay: 0,
     };
   }
 
@@ -35,8 +36,8 @@ class Room extends React.Component {
 
   handleMessageSend = (e) => {
     e.preventDefault();
+    this.props.sendMessage(this.state.messageInput, this.state.delay);
     this.setState({ messageInput: '' });
-    this.props.sendMessage(this.state.messageInput, 0);
   }
 
   componentDidUpdate() {
@@ -56,11 +57,16 @@ class Room extends React.Component {
   }
 
   renderMessages = () => {
+    console.log(this.props.messages);
     const { messages } = this.props.messages;
+    const currentEffectiveDate = new Date((Date.now() - 1000 * this.state.delay) + 3000);
+
     return (
       <ReactCSSTransitionGroup transitionName="message-transition" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
         {
-          messages.map((message, index) => {
+          messages.filter((message) => {
+            return Date.parse(message.date) < Date.parse(currentEffectiveDate);
+          }).map((message, index) => {
             return (
               <Message 
                 key={index} 
@@ -68,6 +74,7 @@ class Room extends React.Component {
                 message={message.message} 
                 mode={this.state.mode === 'default' ? 'default' : 'select'}
                 rating={message.rating}
+                date={message.date}
                 onRate={() => this.handleRate(message.id)}
               />
             )
@@ -129,7 +136,11 @@ class Room extends React.Component {
               <div className='sidenav-content'>
                 <form>
                   <label htmlFor="delay">Delay:</label>
-                  <input id='delay' type='text' />
+                  <input id='delay'
+                    type='text'
+                    value={this.state.delay}
+                    onChange={(e) => this.setState({ delay: e.target.value })}
+                  />
                 </form>
                 <Leaderboard />
                 <TopMessages />
