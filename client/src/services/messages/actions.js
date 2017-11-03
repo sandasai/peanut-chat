@@ -13,6 +13,7 @@ export const Types = {
   onUpdatedProfile: 'onUpdatedProfile',
   onUpdatedLeaderboard: 'onUpdatedLeaderboard',
   onUpdatedTopMessages: 'onUpdatedTopMessages',
+  onSentMessageTimer: 'onSentMessageTimer',
 }
 
 export function createSocket(room, username) {
@@ -54,6 +55,13 @@ export function createSocket(room, username) {
         payload: data,
       });
     });
+
+    socket.on('sent message timer', data => {
+      dispatch({
+        type: Types.onSentMessageTimer,
+        payload: data,
+      });
+    })
 
     socket.on('rated message', data => {
       dispatch({

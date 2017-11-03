@@ -128,6 +128,7 @@ class Room extends React.Component {
                     <input id='message-box' type='text' value={this.state.messageInput} onChange={e => this.setState({ messageInput: e.target.value })}/>
                     <input id='message-submit' type='submit' />
                   </form>
+                  <span>{this.props.messages.messageTimer}</span>
                   <a onClick={() => this.changeMode('thumbs-up')}>
                     <i className="fa fa-thumbs-up rate up" aria-hidden="true"></i>
                   </a>

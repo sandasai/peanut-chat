@@ -17,7 +17,6 @@ function getLeaderboard (io, room) {
     })
     .then(roomDb => {
       queries = socketsInRoom.map((socket) => {
-        console.log('Username: ', socket.username, '| Room name ', roomDb.name)
         return User.findOne({ name: socket.username, room: roomDb.name }).populate('messages')
       })
       return Promise.all(queries)

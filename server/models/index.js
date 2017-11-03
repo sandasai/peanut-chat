@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 //use the Promise library
-mongoose.Promise = global.Promise;
+mongoose.Promise = Promise;
 
 const RoomSchema = Schema({
   name: {
@@ -66,11 +66,25 @@ const UserSchema = Schema({
   },
   nextLevelXp: {
     type: Number, default: 1,
+  },
+  lastMessageSendDate: {
+    type: Date, default: new Date(0)
+  },
+  timeout: {
+    type: Number, default: 45000
+  },
+  lastRatingDate: {
+    type: Date, default: new Date(0)
+  },
+  ratingTimeout: {
+    type: Number, default: 45000
   }
 });
 
 // Updates the level if needed
 UserSchema.methods.updateLevel = function() {
+  // XP per level is simply the number of the next level.
+  // i.e if on level 5, 6 xp needed to move to level 6
   function calcXpAtStartLevel(level) {
     if (level === 0) {
       return 0;

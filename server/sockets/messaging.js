@@ -6,9 +6,9 @@ const Message = mongoose.model('Message');
 function sendMessage (io, socket, room, data) {
   const { message, delay } = data;
   
-  return new Promise((resolve, reject) => {
-    const roomPromise = Room.findOne({ name: room });
-    const userPromise = User.findOne({ name: socket.username, room: room });
+    const roomPromise = Room.findOne({ name: room }).exec();
+    const userPromise = User.findOne({ name: socket.username, room: room }).exec();
+    
     return Promise.all([roomPromise, userPromise])
       .then(values => {
         const roomId = values[0];
@@ -26,6 +26,7 @@ function sendMessage (io, socket, room, data) {
         return Message.findById(createdMessage._id)
                 .populate('room', 'name')
                 .populate('user', 'name')
+                .exec()
       })
       .then(createdMessage => {
         io.to(room).emit('sent message', {
@@ -39,13 +40,14 @@ function sendMessage (io, socket, room, data) {
         return createdMessage;
       })
       .then(createdMessage => {
-        return User.findOne({ name: createdMessage.user.name, room })
+        return User.findOne({ name: createdMessage.user.name, room }).exec()
         .then(user => {
           user.messages.push(createdMessage._id);       
-          return user.save();           
+          user.save(() => {
+            return Promise.resolve()
+          })
         })
       })
-  })
 }
 
 module.exports = {

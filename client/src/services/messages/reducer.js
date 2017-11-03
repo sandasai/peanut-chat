@@ -4,6 +4,7 @@ const initialState = {
   socket: null,
   signInError: null,
   messages: [],
+  messageTimer: 0, 
   profile: {
     messages: 0,
     username: '',
@@ -52,6 +53,9 @@ export default function messages(state = initialState, action) {
           return 0;
       });
       return { ...state, messages: newMessages };
+
+    case Types.onSentMessageTimer:
+      return { ... state, messageTimer: action.payload }
 
     case Types.onRatedMessage: 
       const { id, rating } = action.payload;
