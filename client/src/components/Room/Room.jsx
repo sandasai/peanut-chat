@@ -101,6 +101,7 @@ class Room extends React.Component {
   }
 
   render() {
+
     const { room } = this.props.match.params;
 
     switch(this.state.scene) {

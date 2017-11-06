@@ -57,7 +57,6 @@ class Signin extends React.Component {
   }
 
   render() {
-    console.log(this.state)
     return (
       <div className='signin'>
         <div className='signin-wrapper'>

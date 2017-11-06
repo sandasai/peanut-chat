@@ -19,15 +19,19 @@ class Leaderboard extends React.Component {
 
   render () {
     return (
-      <table>
-        <tr>
-          <th>User</th>
-          <th>XP</th>
-          <th>Messages</th>
-        </tr>
+      <table className="table is-narrow">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>XP</th>
+            <th>Messages</th>
+          </tr>
+        </thead>
+        <tbody>
         {
           this.renderScores()
         }
+        </tbody>
       </table>
     )
   }

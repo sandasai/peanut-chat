@@ -6,14 +6,14 @@ import ProgressBar from './ProgressBar';
 
 class Profile extends React.Component {
   render() {
-    const { username, messageCount, ratings, xp, level, nextLevelXp } = this.props.profile;
-    const filled = (xp / (nextLevelXp - level - 1) - 1) * 100;
+    const { username, messageCount, ratings, xp, level, nextLevelXp, startLevelXp } = this.props.profile;
+    const filled = (xp - startLevelXp) / (nextLevelXp - startLevelXp) * 100
 
     return (
       <div className='profile'>
         <div><strong>{username}</strong></div>
         <div><strong>Messages: {messageCount}</strong></div>
-        <div><ProgressBar filled={nextLevelXp} /></div>
+        <ProgressBar filled={filled} level={level}/>
       </div>
     )
   }

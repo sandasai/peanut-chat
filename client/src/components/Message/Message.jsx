@@ -37,7 +37,6 @@ Message.propTypes = {
   user: PropTypes.string,
   message: PropTypes.string,
   id: PropTypes.string,
-  date: PropTypes.object,
   mode: PropTypes.oneOf(['default', 'select']),
   onRate: PropTypes.func,
   rating: PropTypes.number,

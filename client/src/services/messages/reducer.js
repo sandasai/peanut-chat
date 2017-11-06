@@ -12,6 +12,7 @@ const initialState = {
     xp: 0,
     level: 0,
     nextLevelXp: 1,
+    startLevelXp: 0,
   },
   scene: 'signin',
   leaderboard: [],

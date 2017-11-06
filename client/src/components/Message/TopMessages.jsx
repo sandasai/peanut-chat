@@ -21,10 +21,10 @@ class TopMessages extends React.Component {
   }
 
   render() {
+    console.log('top', this.props.messages)
     return (
       <ul>
         Top Messages
-        <hr />
         {this.renderMessages()}
       </ul>
     )

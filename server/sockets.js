@@ -13,7 +13,8 @@ module.exports = function(io) {
     auth.on['connection'](io, socket, room)
       .then(() => initialize.on['connection'](io, socket, room))
       .then(() => leaderboard.on['connection'](io, socket, room))
-      .then(() => topMessages.on['connection'](io, socket, room))      
+      .then(() => topMessages.on['connection'](io, socket, room))
+      .then(() => rating.on['connection'](io, socket, room))
       .catch(err => {
         socket.disconnect(true);
         console.log(err)
