@@ -6,6 +6,9 @@ module.exports = {
   name: 'timeout',
   on: {
     'send message': function (io, socket, room, data) {
+      if (!socket.roomSettings.timeout)
+        return Promise.resolve();
+
       return User.findOne({ name: socket.username, room: room }).exec()
         .then(user => {
           // check if user on a timer
@@ -39,6 +42,9 @@ module.exports = {
     },
     // Rating currenly uses same timeout algorithm
     'rate message': function (io, socket, room, data) {
+      if (!socket.roomSettings.timeout)
+        return Promise.resolve();
+
       return User.findOne({ name: socket.username, room: room }).exec()
         .then(user => {
           const currentDate = new Date();

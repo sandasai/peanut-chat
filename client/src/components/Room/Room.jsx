@@ -35,8 +35,8 @@ class Room extends React.Component {
     }, 1000)
   }
 
-  handleSignin = (room, username) => {
-    this.props.createSocket(room, username);
+    handleSignin = (room, username, password) => {
+    this.props.createSocket(room, username, password);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -118,25 +118,35 @@ class Room extends React.Component {
                   <Profile />
                 </div>
 
-                <ul>
+                <ul className='message-list'>
                   {this.renderMessages()}
                   <div style={{ float:"left", clear: "both", height: 0 }} ref={(el) => { this.messagesEnd = el; }}></div>
                 </ul>
 
-                <div id='message-interact'>
-                  <form id='message-form' onSubmit={this.handleMessageSend}>
-                    <input id='message-box' type='text' value={this.state.messageInput} onChange={e => this.setState({ messageInput: e.target.value })}/>
-                    <input id='message-submit' type='submit' />
-                  </form>
-                  <span>{this.props.messages.messageTimer}</span>
-                  <a onClick={() => this.changeMode('thumbs-up')}>
-                    <i className="fa fa-thumbs-up rate up" aria-hidden="true"></i>
-                  </a>
-                  <a onClick={() => this.changeMode('thumbs-down')}>
-                    <i className="fa fa-thumbs-down rate down" aria-hidden="true"></i>
-                  </a>
-                </div>
-
+                <form onSubmit={this.handleMessageSend}>
+                  <div className="field has-addons">
+                    <div className="control is-expanded">
+                      <input className="input" type="text" value={this.state.messageInput} onChange={e => this.setState({ messageInput: e.target.value })} />
+                    </div>
+                    <div className="control">
+                      <button type="submit" className="button is-info">
+                        Send
+                      </button>
+                    </div>
+                    <span className="control">
+                      <a className="button is-primary" onClick={() => this.changeMode('thumbs-up')}>
+                        <span className="icon">
+                          <i className="fa fa-thumbs-up" aria-hidden="true"></i>
+                        </span>
+                      </a>
+                    </span>
+                    <span className="control">
+                      <a className="button is-primary" onClick={() => this.changeMode('thumbs-down')}>
+                        <i className="fa fa-thumbs-down" aria-hidden="true"></i>
+                      </a>
+                    </span>
+                  </div>
+                </form>
               </div>
               <a onClick={() => this.setState({ showPanel: !this.state.showPanel})}>
                 <i id="gear" className="fa fa-cog" aria-hidden="true"></i>

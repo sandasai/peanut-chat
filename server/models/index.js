@@ -7,6 +7,7 @@ mongoose.Promise = Promise;
 const RoomSchema = Schema({
   name: {
     type: String,
+    required: true,
   },
   users: [
     {
@@ -17,7 +18,27 @@ const RoomSchema = Schema({
     {
       type: Schema.Types.ObjectId, ref: 'Message'
     }
-  ]
+  ],
+  rating: {
+    type: Boolean,
+    default: true,
+  },
+  leaderboard: {
+    type: Boolean,
+    default: true,
+  },
+  delay: {
+    type: Boolean,
+    default: true,
+  },
+  timeout: {
+    type: Boolean,
+    default: false,
+  },
+  password: {
+    type: String,
+    default: null
+  }
 });
 
 const MessageSchema = Schema({

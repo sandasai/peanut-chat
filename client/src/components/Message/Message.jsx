@@ -21,7 +21,7 @@ export default class Message extends React.Component {
     const { user, message, date, mode, rating } = this.props;
     return (
       <li 
-        className={`message-item ${mode === 'select' ? 'select' : ''} ${hovering ? 'hover' : ''}`}
+        className={`message-item ${mode === 'select' ? 'message-select' : ''} ${hovering ? 'hover' : ''}`}
         onMouseEnter={() => this.setState({ hovering: true })}
         onMouseLeave={() => this.setState({ hovering: false})}
         onClick={this.handleClick}

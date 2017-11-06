@@ -7,6 +7,12 @@
   height: 100vh;
 }
 
+.signin-wrapper {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 30px;
+}
+
 .signin > * {
   margin: 10px 0;
 }
@@ -25,4 +31,8 @@
 
 .signin-form > * {
   margin: 10px 0;  
+}
+
+.input { 
+  min-width: 400px;
 }

@@ -9,13 +9,13 @@
   color: black;
 }
 
-.message-item.select {
+.message-item.message-select {
   cursor: pointer;
   background-color: #e8a3ff;
   transition: 500ms;
 }
 
-.message-item.select.hover {
+.message-item.message-select.hover {
   background-color: #fff;
 }
 

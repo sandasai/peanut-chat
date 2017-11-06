@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const util = require('./util');
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
@@ -5,10 +6,9 @@ const Room = mongoose.model('Room');
 
 let connectionno = 0;
 
-
-function connection (io, socket) {
+function connection (io, socket, data) {
   console.log('connection number: ' + connectionno++);
-  const { room, username } = socket.handshake.query;
+  const { room, username, password } = socket.handshake.query;
   if (!room || !username) {
     console.log(new Error('Client side error, room and username are not included in socket handshake'))
     return Promise.reject('Client side error, room and username are not included in socket handshake');
@@ -44,19 +44,32 @@ function connection (io, socket) {
     .then(user => {
       socket.userId = user._id;          
     })
-    .then(Room.findOne({ name: room }).exec())
+    .then(() => Room.findOne({ name: room }).exec())
     .then(roomDb => {
       // A room has been found
-      if (roomDb)
-        return Promise.resolve();
-      // If room hasn't been found create a new one
+      if (roomDb) {
+        // Store room settings so that it can be accessed in other modules
+        socket.roomSettings = {
+          timeout: roomDb.timeout
+        };
+
+        return new Promise((resolve, reject) => {
+          if (!roomDb.password || roomDb.password === '')
+            resolve();
+          // Need to compare passwords for the room
+          else {
+            bcrypt.compare(password, roomDb.password, (err, res) => {
+              if (res)
+                resolve()
+              else
+                reject('Invalid password for the room')
+            })
+          }
+        })
+      }
+      // If room hasn't been found, we have an error. Should already be created in http routing
       else {
-        let newRoom = new Room({
-          name: room,
-          users: [],
-          messages: [],
-        });
-        return newRoom.save();
+        throw new Error("Room hasn't been created yet")
       }
     })
     .catch(err => {
@@ -65,12 +78,14 @@ function connection (io, socket) {
     });
 }
 
-
-
-// Checks whether the room and username exists on the handshake
-// If username is not already taken in the room,
-// sets the username, userID property on the socket object and joins the room
-// Creates a user in the database if new user, Creates a room in database if new room
+/**
+ * Checks whether the room and username exists on the handshake
+ * If username is not already taken in the room,
+ *  - sets property roomSettings on socket object
+ *  - sets properties on socket object: the username, userID property
+ *  - Creates a user in the database if new user, Creates a room in database if new room
+ *  - joins the room
+ */
 module.exports = {
   name: 'initailize',
   on: {

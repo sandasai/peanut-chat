@@ -16,12 +16,13 @@ export const Types = {
   onSentMessageTimer: 'onSentMessageTimer',
 }
 
-export function createSocket(room, username) {
+export function createSocket(room, username, password) {
   return (dispatch, getStore) => {
     const socket = io(`${serverAddress}`, {
       query: {
         room,
         username,
+        password
       }
     });
     

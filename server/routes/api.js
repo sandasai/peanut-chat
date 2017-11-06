@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
@@ -9,67 +10,73 @@ const Message = mongoose.model('Message');
 const { io } = require('../server');
 const { createChatRoom } = require('../sockets');
 
-router.post('/rooms', (req, res) => {
-  let type;  
-  const name = req.body.room;
-  // check if namespace exists. Query the DB for room
-  Room.findOne({ name }).exec()
-    .then(room => {
-      // A room has been found
-      if (room)
-        type = 'foundRoom';
-      // If room hasn't been found create a new one
-      else {
-        let newRoom = new Room({
-          name,
-          users: [],
-          messages: [],
-        })
-        newRoom.save()
-          .then(room => {
-            room.save();
-            type = 'createRoom';
-            createChatRoom(io, name);
-          })
-          .catch(err => {
-            return Promise.reject(err);
-          });
+router.get('/rooms/:room', (req, res) => {
+  const { room } = req.params;
+  
+  Room.findOne({ name: room }).exec()
+    .then(roomDb => {
+      if (roomDb) {
+        // Room has already been created        
+        return {
+          room: true,
+          settings: {
+            timeout: roomDb.timeout,
+            password: roomDb.password
+          }
+        }
+      } else {
+        // Room doesn't yet exist
+        return {
+          room: false,
+        }
       }
     })
-    .then(() => {
+    .then(r => {
+      return res.status(200).json(r);
+    })
+})
+
+router.post('/rooms', (req, res) => {
+  const { room, rating, leaderboard, timeout, password } = req.body;
+  Room.findOne({ name: Room }).exec()
+    .then(roomDb => {      
+      if (roomDb) {
+        return res.status(400).json({
+          success: false,
+        })
+      }
+      let hashedPassword;
+      if (password) {
+        hashedPassword = new Promise((resolve, reject) => {
+          bcrypt.hash(password, 10, (err, hash) => {
+            if (err)
+              reject(err);
+            resolve(hash);
+          });
+        });
+      } else {
+        hashedPassword = Promise.resolve(null);
+      }
+      return hashedPassword
+    })
+    .then(hashedPassword => {      
+      // Room doesn't exist, create it
+      const newRoom = new Room({
+        name: room,
+        users: [],
+        messages: [],
+        rating,
+        leaderboard,
+        timeout,
+        password: hashedPassword
+      });
+      return newRoom.save()
+    })
+    .then(newRoom => {
       return res.status(200).json({
         success: true,
-        type,
-      })
-    })
-    .catch(err => {
-      return res.status(400).json({
-        success: false,
-        errors: err,
-      })
-    })
-});
-
-router.post('/rooms/signin', (req, res) => {
-  const { room, username } = req.body;
-  // verify that username is currently not being used.
-  /*
-    A couples ways to do it. Requirement: only one user connected at a time:
-      - cookies
-        - check database on whether user is logged in
-      - emit and recieve response via sockets
-  */
-  let message;
-  if (req.session.page_views){
-    req.session.page_views++;
-    message = "You visited this page " + req.session.page_views + " times";
-  } else {
-    req.session.page_views = 1;
-    message = "Welcome to this page for the first time!";
-  }
-  return res.status(200).json({
-    message,
-  })
-});
+      });
+    });
+})
 
 module.exports = router;

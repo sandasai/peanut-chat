@@ -57,7 +57,7 @@
   transition: 500ms;
 }
 
-#message-interact {
+.message-interact {
   flex: 0 0 auto;    
   display: flex;
   flex-direction: row;
@@ -87,20 +87,6 @@
   cursor: pointer;
 }
 
-.rate {
-  padding: 0.2rem;
-  background-color: #ccc;
-  cursor: pointer;
-  font-size: 1.6rem;  
-}
-
-.rate.up {
-  color: #26a552;
-}
-
-.rate.down {
-  color: #ea5c3c;
-}
 /* The side navigation menu */
 .sidenav {
   height: 100%; 

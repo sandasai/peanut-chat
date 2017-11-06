@@ -11,8 +11,8 @@ class Profile extends React.Component {
 
     return (
       <div className='profile'>
-        <div>{username}</div>
-        <div>Messages: {messageCount}</div>
+        <div><strong>{username}</strong></div>
+        <div><strong>Messages: {messageCount}</strong></div>
         <div><ProgressBar filled={nextLevelXp} /></div>
       </div>
     )

@@ -5,6 +5,29 @@ const assert = require('assert');
 const serverAddress = 'http://localhost:5000';
 
 /**
+ * Makes an http request to the server to create a room
+ * @param {string?} [room] optional roomname to specify
+ */
+function createRoom (room, options) {
+  const roomName = room ? room : randomstring.generate({
+    length: 7,
+    charset: 'alphabetic'
+  });
+  return fetch(`${serverAddress}/api/rooms`, {
+    method: 'POST',
+    body: JSON.stringify({
+      room: roomName,
+      ...options
+    }),
+    headers: { "Content-Type": "application/json" }
+  }).then(res => res.json())
+    .then(res => {
+      assert(res.success)
+      return roomName;
+    });
+}
+
+/**
  * Returns a promise that resolves the connection socket
  * @param {*} room 
  * @param {*} name 
@@ -20,172 +43,139 @@ function generateAndAssertConnection(room, username) {
   });
 }
 
-describe('Array', function() {
-  describe('#indexOf()', function() {
-    it('should return -1 when the value is not present', function() {
-      assert.equal(-1, [1,2,3].indexOf(4));
-    });
-  });
-});
-
 describe('Socket.io', () => {
 
   describe('connection', () => {
     it('should connect to a room', done => {
-      const client1 = io.connect(serverAddress, {
-        query: {
-          room: 'testroom1',
-          username: `username_${randomstring.generate()}`,
-        }
+      const roomName = randomstring.generate({
+        length: 7,
+        charset: 'alphabetic'
       });
-      client1.on('auth', data => {
-        assert.equal(data.success, true);
-        client1.disconnect();   
-        done();             
-      });
+      fetch(`${serverAddress}/api/rooms`, {
+        method: 'POST',
+        body: JSON.stringify({
+          room: roomName
+        }),
+        headers: { "Content-Type": "application/json" }
+      }).then(res => res.json())
+        .then(res => {
+          assert(res.success)
+          const client1 = io.connect(serverAddress, {
+            query: {
+              room: roomName,
+              username: `username_${randomstring.generate()}`,
+            }
+          });
+          client1.on('auth', data => {
+            assert.equal(data.success, true);
+            client1.disconnect();
+            done();
+          });
+        })
     });
 
     it('should be unable to connect when a user already exists in the room', done => {
-      const client1 = io.connect(serverAddress, {
-        query: {
-          room: 'testroom1',
-          username: 'testUserA',
-        }
-      });
-      client1.on('auth', data => {
-        assert.equal(data.success, true);
-        let client2 = io.connect(serverAddress, {
-          query: {
-            room: 'testroom1',
-            username: 'testUserA',
-          }
-        });
-        client2.on('auth', data => {
-          assert.equal(data.success, false);
-          client1.disconnect();
-          client2.disconnect();
-          done();
-        });
-      });
+      createRoom()
+        .then(room => {
+          const client1 = io.connect(serverAddress, {
+            query: {
+              room,
+              username: 'testUserA',
+            }
+          });
+          client1.on('auth', data => {
+            assert.equal(data.success, true);
+            let client2 = io.connect(serverAddress, {
+              query: {
+                room,
+                username: 'testUserA',
+              }
+            });
+            client2.on('auth', data => {
+              assert.equal(data.success, false);
+              client1.disconnect();
+              client2.disconnect();
+              done();
+            });
+          });
+        })
     });
 
     it('should be able to connect multiple clients to the same room with different names', done => {
-      let a, b, c = false;
-      const client1 = io.connect(serverAddress, {
-        query: {
-          room: 'testroom1',
-          username: 'testUserD',
-        }
-      });
-      client1.on('auth', data => {
-        assert.equal(data.success, true);
-        a = true;
-      });
+      createRoom()
+        .then(room => {
+          let a, b, c = false;
+          const client1 = io.connect(serverAddress, {
+            query: {
+              room: room,
+              username: 'testUserD',
+            }
+          });
+          client1.on('auth', data => {
+            assert.equal(data.success, true);
+            a = true;
+          });
 
-      const client2 = io.connect(serverAddress, {
-        query: {
-          room: 'testroom1',
-          username: 'testUserE',
-        }
-      });
-      client2.on('auth', data => {
-        assert.equal(data.success, true);
-        b = true;  
-      });
+          const client2 = io.connect(serverAddress, {
+            query: {
+              room: room,
+              username: 'testUserE',
+            }
+          });
+          client2.on('auth', data => {
+            assert.equal(data.success, true);
+            b = true;
+          });
 
+          const client3 = io.connect(serverAddress, {
+            query: {
+              room: room,
+              username: 'testUserF',
+            }
+          });
+          client3.on('auth', data => {
+            assert.equal(data.success, true);
+            c = true;
+          });
 
-      const client3 = io.connect(serverAddress, {
-        query: {
-          room: 'testroom1',
-          username: 'testUserF',
-        }
-      });
-      client3.on('auth', data => {
-        assert.equal(data.success, true);
-        c = true;
-      });
-
-      let interval = setInterval(() => {
-        if (a && b && c) {
-          client1.disconnect();
-          client2.disconnect();
-          client3.disconnect();
-          clearInterval(interval);
-          done();
-        }
-      }, 300);
+          let interval = setInterval(() => {
+            if (a && b && c) {
+              client1.disconnect();
+              client2.disconnect();
+              client3.disconnect();
+              clearInterval(interval);
+              done();
+            }
+          }, 300);
+        })
     });
-
-    it('should be able to connect to different rooms with the same username', done => {
-      let clientA, clientB, clientC;
-      const promiseA = new Promise((resolve, reject) => {
-        clientA = io.connect(serverAddress, {
-          query: {
-            room: 'bathroom',
-            username: 'userA',
-          }
-        });
-        clientA.on('auth', data => {
-          assert.equal(data.success, true);
-          resolve(true);
-        });
-      });
-
-      const promiseB = new Promise((resolve, reject) => {
-        clientB = io.connect(serverAddress, {
-          query: {
-            room: 'restroom',
-            username: 'userA',
-          }
-        });
-        clientB.on('auth', data => {
-          assert.equal(data.success, true);
-          resolve(true);
-        });  
-      });
-
-      const promiseC = new Promise((resolve, reject) => {
-        clientC = io.connect(serverAddress, {
-          query: {
-            room: 'dining room',
-            username: 'userA',
-          }
-        });
-        clientC.on('auth', data => {
-          assert.equal(data.success, true);
-          resolve(true);
-        });
-      });
-
-      Promise.all([promiseA, promiseB, promiseC])
-        .then(() => {
-          clientA.disconnect();
-          clientB.disconnect();
-          clientC.disconnect();
-          done();
-        });
-    });
-  });
+  })
 
   describe('sending messages, recieving messages', () => {
     // Different clients to use
     let clients = {};
     
     beforeEach(done => {
-      let room = randomstring.generate();
-      let a = generateAndAssertConnection(room, 'A');
-      let b = generateAndAssertConnection(room, 'B');
-      let c = generateAndAssertConnection(room, 'C');
-      let d = generateAndAssertConnection(room, 'D');
-      Promise.all([a, b, c, d])
-        .then(values => {
-          clients = {
-            a : values[0],
-            b : values[1],
-            c : values[2],
-            d : values[3],
-          };
-          done();
+      let room = randomstring.generate({
+        length: 7,
+        charset: 'alphabetic'
+      });
+      createRoom(room)
+        .then(roomName => {
+          let a = generateAndAssertConnection(room, 'A');
+          let b = generateAndAssertConnection(room, 'B');
+          let c = generateAndAssertConnection(room, 'C');
+          let d = generateAndAssertConnection(room, 'D');
+          Promise.all([a, b, c, d])
+            .then(values => {
+              clients = {
+                a: values[0],
+                b: values[1],
+                c: values[2],
+                d: values[3],
+              };
+              done();
+            });
         });
     });
   
@@ -257,45 +247,48 @@ describe('Socket.io', () => {
     let testMessage;
 
     beforeEach(done => {
-      let roomName = randomstring.generate({
-        charset: 'alphanumeric',
-        length: 10,
+      const room = randomstring.generate({
+        length: 7,
+        charset: 'alphabetic'
       });
-      let a = generateAndAssertConnection(roomName, 'A');
-      let b = generateAndAssertConnection(roomName, 'B');
-      let c = generateAndAssertConnection(roomName, 'C');
-      let d = generateAndAssertConnection(roomName, 'D');
-      Promise.all([a, b, c, d])
-        .then(values => {
-          let messageString = randomstring.generate();
-          clients = {
-            a : values[0],
-            b : values[1],
-            c : values[2],
-            d : values[3],
-          };
-          // store the message sent
-          const promises = [];
-          for (let client in clients) {
-            let promise = new Promise((resolve, reject) => {
-              clients[client].on('sent message', data => {
-                if (data.message === messageString) {
-                  testMessage = data;                  
-                  resolve();
-                } else {
-                  reject(new Error('Message discrepancy'));
-                }
-              });
-            })
-            promises.push(promise);
-          }
+      createRoom(room)
+        .then(roomName => {
+          let a = generateAndAssertConnection(roomName, 'A');
+          let b = generateAndAssertConnection(roomName, 'B');
+          let c = generateAndAssertConnection(roomName, 'C');
+          let d = generateAndAssertConnection(roomName, 'D');
+          Promise.all([a, b, c, d])
+            .then(values => {
+              let messageString = randomstring.generate();
+              clients = {
+                a: values[0],
+                b: values[1],
+                c: values[2],
+                d: values[3],
+              };
+              // store the message sent
+              const promises = [];
+              for (let client in clients) {
+                let promise = new Promise((resolve, reject) => {
+                  clients[client].on('sent message', data => {
+                    if (data.message === messageString) {
+                      testMessage = data;
+                      resolve();
+                    } else {
+                      reject(new Error('Message discrepancy'));
+                    }
+                  });
+                })
+                promises.push(promise);
+              }
 
-          setTimeout(() => {
-            clients.a.emit('send message', { message: messageString, delay: 0 })
-          }, 1000);
+              setTimeout(() => {
+                clients.a.emit('send message', { message: messageString, delay: 0 })
+              }, 1000);
 
-          return Promise.all(promises).then(() => done());
-        });
+              return Promise.all(promises).then(() => done());
+            });
+        })
     });
   
     afterEach(done => {
@@ -422,5 +415,35 @@ describe('Socket.io', () => {
       }, 3000);
     })
     
+  });
+
+  describe('creating new rooms with passwords', done => {
+    it('should create a new room with a password', done => {
+      createRoom(null, {
+        password: '12345'
+      }).then(roomName => {
+        setTimeout(() => {
+          const username = randomstring.generate();
+          const client = io.connect(serverAddress, { query: { room: roomName, username, password: '12345' } });
+          client.on('auth', data => {
+            assert.equal(data.success, true);
+            done();
+          });
+        }, 1000)
+      });
+    });
+
+    it('should not be able to connect with a wrong password to a room', done => {
+      createRoom(null, {
+        password: '12345'
+      }).then(roomName => {
+        const username = randomstring.generate();
+        const client = io.connect(serverAddress, { query: { room: roomName, username, password: ' 12345' } });
+        client.on('auth', data => {
+          assert.equal(data.success, false);
+          done();
+        });
+      });
+    });
   });
 });

@@ -25,10 +25,13 @@ const app = express();
 // NOTE, during development, build client. Uses create-react-app build files and serve them. 
 app.use(express.static(path.join(__dirname, '/../client/build')));
 
-//http parsers
+// http parsers
 app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Use routes
+app.use('/', require('./routes'));
 
 // Save all data via sockets
 const server = http.createServer(app);

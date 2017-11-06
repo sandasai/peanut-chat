@@ -4,15 +4,18 @@ const rating = require('./sockets/rating');
 const leaderboard = require('./sockets/leaderboard')
 const topMessages = require('./sockets/topMessages');
 const timeout = require('./sockets/timeout');
+const auth = require('./sockets/auth');
 
 module.exports = function(io) {
   io.on('connection', socket => {
-    const { username, room } = socket.handshake.query;    
+    const { username, room, password } = socket.handshake.query;    
  
-    initialize.on['connection'](io, socket)
+    auth.on['connection'](io, socket, room)
+      .then(() => initialize.on['connection'](io, socket, room))
       .then(() => leaderboard.on['connection'](io, socket, room))
       .then(() => topMessages.on['connection'](io, socket, room))      
       .catch(err => {
+        socket.disconnect(true);
         console.log(err)
       })
 
