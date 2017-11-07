@@ -31,7 +31,8 @@ module.exports = function(io) {
     });
 
     socket.on('rate message', data => {
-      rating.on['rate message'](io, socket, room, data)
+      timeout.on['rate message'](io, socket, room, data)
+        .then(() => rating.on['rate message'](io, socket, room, data))
         .then(() => leaderboard.on['rate message'](io, socket, room, data))
         .then(() => topMessages.on['rate message'](io, socket, room, data))
         .catch(err => {

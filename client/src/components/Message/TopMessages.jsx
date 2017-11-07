@@ -1,5 +1,4 @@
 import React from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import Message from './Message';
@@ -21,7 +20,6 @@ class TopMessages extends React.Component {
   }
 
   render() {
-    console.log('top', this.props.messages)
     return (
       <ul>
         Top Messages

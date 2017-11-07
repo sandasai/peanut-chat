@@ -14,6 +14,7 @@ export const Types = {
   onUpdatedLeaderboard: 'onUpdatedLeaderboard',
   onUpdatedTopMessages: 'onUpdatedTopMessages',
   onSentMessageTimer: 'onSentMessageTimer',
+  onRatedTimer: 'onRatedTimer'
 }
 
 export function createSocket(room, username, password) {
@@ -70,6 +71,13 @@ export function createSocket(room, username, password) {
         payload: data,
       });
     });
+
+    socket.on('rated timer', data => {
+      dispatch({
+        type: Types.onRatedTimer,
+        payload: data,
+      })
+    })
 
     socket.on('changed xp', data => {
       dispatch({

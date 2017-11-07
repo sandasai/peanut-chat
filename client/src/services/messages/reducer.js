@@ -5,6 +5,7 @@ const initialState = {
   signInError: null,
   messages: [],
   messageTimer: 0, 
+  ratingTimer: 0,
   profile: {
     messages: 0,
     username: '',
@@ -17,20 +18,6 @@ const initialState = {
   scene: 'signin',
   leaderboard: [],
   topMessages: [],
-}
-
-// Sorts messages by date
-function sortMessages(messages) {
-  messages.sort((a, b) => {
-    const aMili = Date.parse(a.date);
-    const bMili = Date.parse(b.date);
-    if (aMili < bMili)
-      return -1
-    else if (aMili > bMili)
-      return 1;
-    else 
-      return 0;
-  });
 }
 
 export default function messages(state = initialState, action) {
@@ -56,15 +43,19 @@ export default function messages(state = initialState, action) {
       return { ...state, messages: newMessages };
 
     case Types.onSentMessageTimer:
-      return { ... state, messageTimer: action.payload }
+      return { ...state, messageTimer: action.payload }
 
     case Types.onRatedMessage: 
-      const { id, rating } = action.payload;
+      const { rating } = action.payload;
       const foundMessage = state.messages.find((message) => {
         return message.id === action.payload.id;
       })
-      foundMessage.rating = rating;
+      if (foundMessage)
+        foundMessage.rating = rating;
       return { ...state };
+
+    case Types.onRatedTimer:
+      return { ...state, ratingTimer: action.payload }
 
     case Types.onChangedXp:
       const { level, xp, nextLevelXp } = action.payload;

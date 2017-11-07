@@ -1,12 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import ProgressBar from './ProgressBar';
 
 class Profile extends React.Component {
   render() {
-    const { username, messageCount, ratings, xp, level, nextLevelXp, startLevelXp } = this.props.profile;
+    const { username, messageCount, xp, level, nextLevelXp, startLevelXp } = this.props.profile;
     const filled = (xp - startLevelXp) / (nextLevelXp - startLevelXp) * 100
 
     return (

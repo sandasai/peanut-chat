@@ -10,8 +10,8 @@ module.exports = {
       //Pull up profile information if it exists, send it back
       return User.findOne({ name: socket.username, room }).then(user => {
         if (user) {
-          const { level, xp, messages } = user;
-          socket.emit('updated profile', { level, xp, nextLevelXp: xp + level + 1, messageCount: messages.length })      
+          const { level, xp, messages, startLevelXp } = user;
+          socket.emit('updated profile', { level, xp, nextLevelXp: xp + level + 1, messageCount: messages.length, startLevelXp })      
         }
       })
     },

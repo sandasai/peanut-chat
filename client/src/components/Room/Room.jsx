@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import { actions } from '../../services/messages';
-import { Room as RoomService } from '../../services';
 
 import Message from '../Message';
 import Signin from '../Signin';
@@ -93,7 +92,8 @@ class Room extends React.Component {
     );
   }
 
-  changeMode = (mode) => {
+  changeMode = (e, mode) => {
+    e.preventDefault();
     if (this.state.mode === mode)
       this.setState({ mode: 'default'});
     else
@@ -101,8 +101,9 @@ class Room extends React.Component {
   }
 
   render() {
-
     const { room } = this.props.match.params;
+    const messageTimeout = this.props.messages.messageTimer / 1000;
+    const ratingTimeout = this.props.messages.ratingTimer / 1000;
 
     switch(this.state.scene) {
       case 'signin':
@@ -129,22 +130,31 @@ class Room extends React.Component {
                     <div className="control is-expanded">
                       <input className="input" type="text" value={this.state.messageInput} onChange={e => this.setState({ messageInput: e.target.value })} />
                     </div>
-                    <div className="control">
-                      <button type="submit" className="button is-info">
-                        Send
+                    <div className="control has-addons">
+                      <button type="submit" disabled={messageTimeout > 0 ? true : false} className="button is-info">
+                        {messageTimeout !== 0 ? messageTimeout : 'Send'}
                       </button>
                     </div>
                     <span className="control">
-                      <a className="button is-primary" onClick={() => this.changeMode('thumbs-up')}>
-                        <span className="icon">
-                          <i className="fa fa-thumbs-up" aria-hidden="true"></i>
-                        </span>
-                      </a>
-                    </span>
-                    <span className="control">
-                      <a className="button is-primary" onClick={() => this.changeMode('thumbs-down')}>
-                        <i className="fa fa-thumbs-down" aria-hidden="true"></i>
-                      </a>
+                      {ratingTimeout !== 0 &&
+                      <div className="rating-timer">
+                        <span>{ratingTimeout}</span>
+                      </div>
+                      }
+                      <span className="control">
+                        <button className="button is-primary" onClick={e => this.changeMode(e, 'thumbs-up')} disabled={ratingTimeout !== 0}>
+                          <span className="icon">
+                            <i className="fa fa-thumbs-up" aria-hidden="true"></i>
+                          </span>
+                        </button>
+                      </span>
+                      <span className="control">
+                        <button className="button is-primary" onClick={e => this.changeMode(e, 'thumbs-down')} disabled={ratingTimeout !== 0}>
+                          <span className="icon">
+                            <i className="fa fa-thumbs-down" aria-hidden="true"></i>
+                          </span>
+                        </button>
+                      </span>
                     </span>
                   </div>
                 </form>
@@ -155,14 +165,14 @@ class Room extends React.Component {
             </div>
             <div className={`sidenav ${this.state.showPanel ? 'visible' : 'hidden'}`}>
               <div className='sidenav-content'>
-                <form>
+                <div className='delay'>
                   <label htmlFor="delay">Delay:</label>
                   <input id='delay'
                     type='text'
                     value={this.state.delay}
                     onChange={(e) => this.setState({ delay: e.target.value })}
                   />
-                </form>
+                </div>
                 <Leaderboard />
                 <TopMessages />
               </div>
